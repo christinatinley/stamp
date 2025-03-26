@@ -1,0 +1,9 @@
+# Python-related ignores
+.venv/                      # Virtual environment
+__pycache__/               # Compiled Python files
+*.pyc                      # Python cache files
+*.pyo                      # Compiled Python files
+*.pyd                      # Windows DLLs
+instance/                  # Flask instance folder (contains runtime data)
+.env                       # Environment variables
+.env.local                 # Local environment overrides

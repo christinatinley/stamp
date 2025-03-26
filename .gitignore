@@ -1,0 +1,10 @@
+# Logs and system files
+logs/                      # Log files
+*.log                      # Any log files
+*.DS_Store                 # macOS system file
+Thumbs.db                  # Windows system file
+
+# IDE & Editor settings
+.vscode/                   # VS Code settings
+.idea/                     # JetBrains IDE settings
+*.swp                      # Vim swap files
