@@ -11,8 +11,8 @@ Thumbs.db                  # Windows system file
 
 # Python-related ignores
 **/.venv/                  # Virtual environment
-**/__pycache__/            # Python cache directory
-**/*.pyc                   # Python cache files
+**/app/__pycache__/            # Python cache directory
+*.pyc                   # Python cache files
 **/*.pyo                   # Compiled Python files
 **/*.pyd                   # Windows DLLs
 **/instance/               # Flask instance folder (contains runtime data)
