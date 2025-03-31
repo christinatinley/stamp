@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 import requests
-from flasgger import Swagger
+from flasgger import Swagger, swag_from
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
 
 @app.route('/places', methods=['GET'])
+@swag_from('app.yml')
 def get_places():
     input_text = request.args.get('input')
     api_key = "AIzaSyCjZ_ClVlhmfOTrzkbjpjk8LV_UHD68zgk"

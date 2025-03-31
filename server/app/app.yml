@@ -1,0 +1,31 @@
+paths:
+  /places:
+    get:
+      summary: Get place autocomplete suggestions
+      description: Returns place autocomplete suggestions based on user input using the Google Places API.
+      parameters:
+        - name: input
+          in: query
+          required: true
+          description: The partial text input for place autocomplete.
+          schema:
+            type: string
+      responses:
+        200:
+          description: A JSON response containing place autocomplete suggestions.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        place_id:
+                          type: string
+                  status:
+                    type: string
