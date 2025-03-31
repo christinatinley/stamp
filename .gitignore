@@ -1,20 +1,40 @@
 # Logs and system files
-logs/                      # Log files
-*.log                      # Any log files
-*.DS_Store                 # macOS system file
-Thumbs.db                  # Windows system file
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# IDE & Editor settings
-.vscode/                   # VS Code settings
-.idea/                     # JetBrains IDE settings
-*.swp                      # Vim swap files
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
 
 # Python-related ignores
-**/.venv/                  # Virtual environment
-**/app/__pycache__/            # Python cache directory
-*.pyc                   # Python cache files
-**/*.pyo                   # Compiled Python files
-**/*.pyd                   # Windows DLLs
-**/instance/               # Flask instance folder (contains runtime data)
-**/.env                    # Environment variables
-**/.env.local              # Local environment overrides
+**/.venv/
+**/app/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+**/instance/
+.env
+.env.local
