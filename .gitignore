@@ -8,3 +8,13 @@ Thumbs.db                  # Windows system file
 .vscode/                   # VS Code settings
 .idea/                     # JetBrains IDE settings
 *.swp                      # Vim swap files
+
+# Python-related ignores
+**/.venv/                  # Virtual environment
+**/__pycache__/            # Python cache directory
+**/*.pyc                   # Python cache files
+**/*.pyo                   # Compiled Python files
+**/*.pyd                   # Windows DLLs
+**/instance/               # Flask instance folder (contains runtime data)
+**/.env                    # Environment variables
+**/.env.local              # Local environment overrides
