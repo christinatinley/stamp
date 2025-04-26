@@ -22,7 +22,7 @@ def get_city(city_name):
             return lat, lng
 
 #get the list of places by the latitude and longitude
-def get_places(lat, lng):
+def get_places(lat, lng, radius):
     url = "https://places.googleapis.com/v1/places:searchNearby"
     
     headers = {
@@ -38,7 +38,7 @@ def get_places(lat, lng):
                     "latitude": lat,
                     "longitude": lng
                 },
-                "radius": 1000
+                "radius": radius
             }
         }
     }
