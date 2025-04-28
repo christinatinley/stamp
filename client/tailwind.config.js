@@ -6,7 +6,7 @@ export default {
       colors: {
         background: '#6D213C',
         text: '#F9F0DC',
-        link: '#007bff',
+        link: '#F9F0DC',
         'header-1': '#F9F0DC',
         'header-2': '#CB769E',
         'header-3': '#F9F0DC',

@@ -31,7 +31,7 @@ const items = ref([
                 </router-link>
             </template>
             <template #end>
-                <Avatar label="C" shape="circle" size="large" class="bg-accent-1 font-abril text"/>
+                <Avatar label="C" shape="circle" size="large" class="bg-accent-1 font-abril text-background"/>
             </template>
         </Menubar>
 </template>
