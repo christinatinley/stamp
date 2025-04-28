@@ -9,7 +9,7 @@ export default {
         link: '#007bff',
         'header-1': '#F9F0DC',
         'header-2': '#CB769E',
-        'header-3': '#CB769E',
+        'header-3': '#F9F0DC',
         accent: '#226D5E',
         'accent-2': '#DDE1FF',
       },

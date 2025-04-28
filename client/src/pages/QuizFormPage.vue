@@ -46,5 +46,4 @@ export default {
       <button type="submit" class="p-button p-component">Submit</button>
     </div>
     </Form>
-  <i class="pi pi-bitcoin" style="font-size: 1rem"></i>
 </template>
