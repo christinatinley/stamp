@@ -1,37 +1,44 @@
-@import './base.css';
-@import 'tailwindcss';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+
 @import 'primeicons/primeicons.css';
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
+/* --------------------
+   Tailwind Base Layer
+-------------------- */
+@layer base {
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    @apply flex flex-col min-h-screen;
+  }
+
+  body {
+    @apply font-space text-text bg-background;
+  }
+
+  h1, h2, h3 {
+    @apply font-abril font-bold lowercase;
+  }
+
+  h1 {
+    @apply text-header-1 text-6xl;
+  }
+
+  h2 {
+    @apply text-header-2 text-4xl;
+  }
+
+  h3 {
+    @apply text-header-3 text-2xl;
+  }
+
+  a {
+    @apply text-link no-underline transition-all duration-300;
+  }
+
+  a:hover {
+    @apply bg-opacity-20;
   }
 }
