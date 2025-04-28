@@ -19,36 +19,22 @@ export default {
 </script>
 
 <template>
-  <div class="quiz-form-container">
+  <div class="full-screen-wrapper">
     <div class="quiz-form-card">
       <p class="text-2xl font-bold mb-4">Quiz Form</p>
-
-      <div class="p-fluid mb-3">
-        <div class="p-field mb-4">
-          <label for="name">Your Name</label>
-          <InputText id="name" v-model="name" />
-        </div>
-
-        <div class="p-field mb-4">
-          <label for="favoriteColor">Favorite Color?</label>
-          <InputText id="favoriteColor" v-model="favoriteColor" />
-        </div>
-
-        <Button label="Submit" icon="pi pi-check" @click="submitQuiz" />
-      </div>
+      <i class="pi pi-check"></i>
     </div>
   </div>
 </template>
 
 <style scoped>
-.quiz-form-container {
+.full-screen-wrapper {
   min-height: 100vh;
-  min-width: 100vh;
-  background-color: #6D213C; 
+  min-width: 100vw; 
+  background-color: #f0f4f8; /* Your background color */
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 2rem;
+  align-items: center;
 }
 
 .quiz-form-card {
