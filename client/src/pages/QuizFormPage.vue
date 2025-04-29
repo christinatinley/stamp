@@ -3,6 +3,7 @@ import { Form } from '@primevue/forms';
 import DatePicker from 'primevue/datepicker';
 import Message from 'primevue/message';
 import Slider from 'primevue/slider';
+import NavBar from '../components/NavBar.vue';
 
 export default {
   name: 'QuizFormPage',
@@ -28,6 +29,9 @@ export default {
         { name: 'Local Cuisine', rating: 0 },
       ],
       distanceWillingToTravel: '',
+      dietaryRestrictions: '',
+      transportaion: '',
+      duringTripTransportation: '',
     };
   },
   methods: {
@@ -42,6 +46,9 @@ export default {
         lodging: this.lodging,
         experiences: this.experiences,
         distanceWillingToTravel: this.distanceWillingToTravel,
+        dietaryRestrictions: this.dietaryRestrictions,
+        transportaion: this.transportaion,
+        duringTripTransportation: this.duringTripTransportation,
       });
     },
   },
@@ -50,10 +57,17 @@ export default {
 
 <template>
   <div class="flex flex-col w-full">
-    <img
-      src="../travel_quiz_background.jpg"
-      class="w-full max-h-64 object-cover mb-4"
-    />
+    <div class="relative w-full h-64">
+      <!-- NavBar component -->
+      <NavBar class="absolute top-0 left-0 w-full z-10" />
+
+      <!-- background image -->
+      <img
+        src="../travel_quiz_background.jpg"
+        alt="Travel Quiz Background"
+        class="w-full h-full object-cover"
+      />
+    </div>
     <h2 class="px-80 text-4xl font-bold mb-4">Travel Quiz</h2>
     <Form
       v-slot="$form"
@@ -137,6 +151,45 @@ export default {
                 />
         </div>
 
+        <!-- dietary restrictions input -->
+        <div class="flex flex-col">
+            <label for="dietaryRestrictions" class="mb-1 text-sm font-medium">do you have any dietary restrictions?</label>
+
+            <input
+                id="dietaryRestrictions"
+                v-model="dietaryRestrictions"
+                type="text"
+                class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
+                required
+                />
+        </div>
+
+        <!-- transportation to get to destination input -->
+        <div class="flex flex-col">
+            <label for="transportation" class="mb-1 text-sm font-medium">what transportation would you prefer to get to your destination?</label>
+
+            <input
+                id="transportation"
+                v-model="transportation"
+                type="text"
+                class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
+                required
+                />
+        </div>
+
+        <!-- transportation during trip -->
+        <div class="flex flex-col">
+            <label for="duringTripTransportation" class="mb-1 text-sm font-medium">what types of transportation would you prefer during your trip?</label>
+
+            <input
+                id="duringTripTransportation"
+                v-model="duringTripTransportation"
+                type="text"
+                class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
+                required
+                />
+        </div>
+
         <!-- distance willing to travel input -->
         <div class="flex flex-col">
             <label for="distanceWillingToTravel" class="mb-1 text-sm font-medium">how far are you willing to travel?</label>
@@ -155,7 +208,7 @@ export default {
           <h2 class="text-2xl font-semibold mb-4">What experiences are you interested in?</h2>
 
           <!-- experience rating sliders -->
-          <div v-for="(experience, index) in experiences" :key="index" class="flex flex-col pr-80">
+          <div v-for="(experience, index) in experiences" :key="index" class="flex flex-col">
             <label :for="'experience-' + experience.name" class="mb-2">
               Rate your interest in {{ experience.name }}:
             </label>
