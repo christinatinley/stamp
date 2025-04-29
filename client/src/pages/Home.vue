@@ -1,5 +1,6 @@
 <script setup>
 import NavBar from '@/components/NavBar.vue';
+import Footer from '@/components/Footer.vue';
 import Card from 'primevue/card';
 import { Button } from 'primevue';
 import { useRouter } from 'vue-router';
@@ -28,4 +29,5 @@ const router = useRouter();
         </Card>
       </div>
     </div>
+    <Footer />
   </template>
