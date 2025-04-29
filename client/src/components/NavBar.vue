@@ -10,7 +10,7 @@ const items = ref([
     }, 
     {
         label: "take the quiz",
-        to: "/Quiz",
+        to: "/TakeQuiz",
     }
 ])
 

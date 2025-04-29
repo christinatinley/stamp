@@ -24,7 +24,7 @@ const router = useRouter();
             <p class="text-text m-5">take the stress out of travel. you dream it, we take care of the rest</p>
           </template>
           <template #footer>
-            <Button label="plan your trip today" class="p-5 bg-header-2 text-text rounded-lg" @click="router.push('/Quiz')" />
+            <Button label="plan your trip today" class="p-5 bg-header-2 text-text rounded-lg" @click="router.push('/TakeQuiz')" />
           </template>
         </Card>
       </div>
