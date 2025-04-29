@@ -4,6 +4,7 @@ import DatePicker from 'primevue/datepicker';
 import Message from 'primevue/message';
 import Slider from 'primevue/slider';
 import NavBar from '@/components/NavBar.vue';
+import Footer from '@/components/Footer.vue';
 
 export default {
   name: 'QuizFormPage',
@@ -12,6 +13,7 @@ export default {
     Message,
     Slider,
     NavBar,
+    Footer
   },
   data() {
     return {
@@ -231,6 +233,7 @@ export default {
         </button>
       </div>
     </Form>
+    <Footer/>
   </div>
 </template>
 
