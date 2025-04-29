@@ -3,6 +3,7 @@ import { Form } from '@primevue/forms';
 import DatePicker from 'primevue/datepicker';
 import Message from 'primevue/message';
 import Slider from 'primevue/slider';
+import NavBar from '@/components/NavBar.vue';
 
 export default {
   name: 'QuizFormPage',
@@ -10,6 +11,7 @@ export default {
     DatePicker,
     Message,
     Slider,
+    NavBar,
   },
   data() {
     return {
@@ -56,7 +58,8 @@ export default {
 
 <template>
   <div class="flex flex-col w-full">
-
+    
+      <NavBar/>    
       <!-- background image -->
       <img
         src="../travel_quiz_background.jpg"

@@ -12,10 +12,8 @@ export default {
 </script>
 
 <template>
-  <NavBar/>
-  <QuizFormPage />
+  <router-view/>
 </template>
 
 <style scoped>
-
 </style>
