@@ -236,4 +236,8 @@ export default {
 .p-inputtext {
   color: black !important;
 }
+
+.flex.flex-col {
+  margin-bottom: 1.5rem; /* Customize this value to control the spacing */
+}
 </style>
