@@ -27,6 +27,7 @@ export default {
         { name: 'Nature Exploration', rating: 0 },
         { name: 'Local Cuisine', rating: 0 },
       ],
+      distanceWillingToTravel: '',
     };
   },
   methods: {
@@ -40,6 +41,7 @@ export default {
         numberOfTravelers: this.numberOfTravelers,
         lodging: this.lodging,
         experiences: this.experiences,
+        distanceWillingToTravel: this.distanceWillingToTravel,
       });
     },
   },
@@ -48,11 +50,15 @@ export default {
 
 <template>
   <div class="flex flex-col w-full">
-    <h2 class="px-40 text-4xl font-bold mb-4">Travel Quiz</h2>
+    <img
+      src="../travel_quiz_background.jpg"
+      class="w-full max-h-64 object-cover mb-4"
+    />
+    <h2 class="px-80 text-4xl font-bold mb-4">Travel Quiz</h2>
     <Form
       v-slot="$form"
       @submit="submitForm"
-      class="flex flex-col gap-4 w-full px-40 py-6"
+      class="flex flex-col gap-4 w-full px-80 py-6"
     >
       <div class="p-fluid w-full flex flex-col gap-4">
         <!-- destination input -->
@@ -91,16 +97,6 @@ export default {
             />
           </div>
         </div>
-
-        <!-- <div class="flex flex-col">
-          <label for="description" class="mb-1 text-sm font-medium">Please enter your budget for the trip:</label>
-          <textarea
-            id="description"
-            v-model="description"
-            class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
-            required
-          ></textarea>
-        </div> -->
 
         <!-- budget input -->
         <div class="flex flex-col">
@@ -141,12 +137,25 @@ export default {
                 />
         </div>
 
-        <!-- Experience Rating Section -->
+        <!-- distance willing to travel input -->
+        <div class="flex flex-col">
+            <label for="distanceWillingToTravel" class="mb-1 text-sm font-medium">how far are you willing to travel?</label>
+
+            <input
+                id="distanceWillingToTravel"
+                v-model="distanceWillingToTravel"
+                type="text"
+                class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
+                required
+                />
+        </div>
+
+        <!-- experience rating section -->
         <div class="flex flex-col mb-4">
           <h2 class="text-2xl font-semibold mb-4">What experiences are you interested in?</h2>
 
-          <!-- Experience Rating Sliders -->
-          <div v-for="(experience, index) in experiences" :key="index" class="flex flex-col mb-4">
+          <!-- experience rating sliders -->
+          <div v-for="(experience, index) in experiences" :key="index" class="flex flex-col pr-80">
             <label :for="'experience-' + experience.name" class="mb-2">
               Rate your interest in {{ experience.name }}:
             </label>
@@ -165,7 +174,7 @@ export default {
         </div>
 
         <!-- submit button -->
-        <button type="submit" class="p-button p-component w-full bg-[#F9F0DC] hover:bg-[#E5D9A2] text-black">
+        <button type="submit" class="rounded-md border p-button p-component w-full bg-[#F9F0DC] hover:bg-[#E5D9A2] text-black">
           submit
         </button>
       </div>
