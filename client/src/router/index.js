@@ -1,4 +1,5 @@
 import Home from "@/pages/Home.vue";
+import QuizFormPage from "@/pages/QuizFormPage.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
@@ -8,6 +9,10 @@ const router = createRouter({
             path: "/",
             component: Home,
         },
+        {
+            path: "/Quiz",
+            component: QuizFormPage,
+        }
     ],
 });
 

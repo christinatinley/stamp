@@ -2,9 +2,6 @@
 import { Menubar } from 'primevue';
 import Avatar from 'primevue/avatar';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 
 const items = ref([
     {
@@ -12,7 +9,8 @@ const items = ref([
         to: "/",
     }, 
     {
-        label: "take the quiz"
+        label: "take the quiz",
+        to: "/Quiz",
     }
 ])
 
