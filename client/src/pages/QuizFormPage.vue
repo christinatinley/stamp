@@ -1,5 +1,5 @@
 <script>
-import { Form } from '@primevue/forms';
+import { Form } from '@primevue/form';
 
 export default {
   name: 'QuizFormPage',
