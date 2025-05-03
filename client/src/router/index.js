@@ -1,5 +1,5 @@
 import Home from "@/pages/Home.vue";
-import QuizFormPage from "@/pages/QuizFormPage.vue";
+import QuizFormPage from "@/quiz/QuizFormPage.vue";
 import TakeTheQuizPage from "@/pages/TakeTheQuizPage.vue";
 import { createRouter, createWebHistory } from "vue-router";
 

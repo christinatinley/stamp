@@ -1,6 +1,6 @@
 <script>
 import NavBar from './components/NavBar.vue';
-import QuizFormPage from './pages/QuizFormPage.vue'
+import QuizFormPage from './quiz/QuizFormPage.vue'
 
 export default {
   name: 'App',
