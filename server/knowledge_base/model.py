@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from knowledge_base import k_b
 import torch
+import requests
 
 # temp workaround
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -26,24 +27,60 @@ def embed_chunk(text):
     embedding = embeddings_model.embed_query(text)
     return np.array(embedding) 
 
+# Function to embed multiple chunks of text
+def embed_chunks(chunks):
+    url = "https://api.mistral.ai/v1/embeddings"
+    headers = {
+        "Authorization": "Bearer " + api_key,
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "mistral-embed",
+        "input": chunks
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()  # Raise error for bad HTTP responses
+        response_data = response.json()
+
+        embeddings = response_data.get("data", [])
+        if not embeddings:
+            raise ValueError("No embeddings found in response.")
+        
+        # Ensure that embeddings are returned as a list of numeric values (not dicts)
+        return [embedding.get("embedding", []) for embedding in embeddings]
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error with the API request: {e}")
+        return []
+
 # Function to add a chunk to the database (embeds it and stores the text)
-def add_chunk_to_database(place_data):
-    name = place_data.get('displayName', 'No Name')
-    address = place_data.get('formatted_address', 'No Address')
-    rating = place_data.get('rating', 'No Rating')
-    review = place_data.get('reviews', ['No Review'])[0]
-    types = place_data.get('types', ['No Type'])
-  
-    # Create a chunk of text containing the place's details
-    chunk = f"""Place Name: {name}
-Address: {address}
-Rating: {rating}
-Reviews: {review}
-Types: {', '.join(types)}
-"""
-    # Embed the chunk and add to the database
-    embedding = embed_chunk(chunk)
-    VECTOR_DB.append((embedding, chunk))
+def add_chunk_to_database(place_data_list):
+    chunks = []
+    
+    for place_data in place_data_list:
+        name_data = place_data.get('displayName', {'text': 'No Name'})
+        name = name_data.get('text', 'No Name') if isinstance(name_data, dict) else str(name_data)
+
+        address = place_data.get('formatted_address', 'No Address')
+        rating = place_data.get('rating', 'No Rating')
+        review = place_data.get('reviews', ['No Review'])[0]
+        types = place_data.get('types', ['No Type'])
+
+        # Create a chunk of text containing the place's details
+        chunk = f"""Place Name: {name}
+    Address: {address}
+    Rating: {rating}
+    Reviews: {review}
+    Types: {', '.join(types)}
+    """
+        chunks.append(chunk)
+
+    # Embed the chunks and add to database
+    embeddings = embed_chunks(chunks)
+    for embedding, chunk in zip(embeddings, chunks):
+        VECTOR_DB.append((embedding, chunk))  # Store the embedding and the corresponding chunk
 
 # Function to build a FAISS index from the stored vectors
 def build_faiss_index():
@@ -83,13 +120,10 @@ def retrieve(query, index, top_n=5):
 def build_places(lat, lng):
     places = k_b.get_places(lat, lng, 1000)
     places = places['places']
-    for i,p in enumerate(places):
-        print("Adding next chunk...", i)
-        add_chunk_to_database(p)
-
+    add_chunk_to_database(places)
+    
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, days, culture, history, art, nature, walking_tours, shopping):
-    lat, lng = k_b.get_city(city_name)  # Get coordinates for the city
+def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, itinerary):
     build_places(lat, lng)  # Build the places database for the city
     index = build_faiss_index()  # Build the FAISS index for place embeddings
     
@@ -102,7 +136,8 @@ def generate_itinerary(city_name, days, culture, history, art, nature, walking_t
     nature: {nature}/10
     walking tours: {walking_tours}/10
     shopping: {shopping}/10
-    When choosing a place, check to see if it is already in the itinerary. If it is, pick another activity. Avoid picking the same place."""
+    These are all the places I am already visiting: {itinerary}
+    Please suggest activities that are not already in the itinerary. If it is, pick another activity. Avoid picking the same place twice."""
     
     # Retrieve the top N places based on the query
     results = retrieve(query, index, top_n=3*days)
