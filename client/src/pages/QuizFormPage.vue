@@ -1,10 +1,13 @@
 <script>
 import { Form } from '@primevue/forms';
+import { useRouter } from 'vue-router';
 import DatePicker from 'primevue/datepicker';
 import Message from 'primevue/message';
 import Slider from 'primevue/slider';
 import NavBar from '@/components/NavBar.vue';
 import Footer from '@/components/Footer.vue';
+
+const router = useRouter();
 
 export default {
   name: 'QuizFormPage',
@@ -228,7 +231,7 @@ export default {
         </div>
 
         <!-- submit button -->
-        <button type="submit" class="rounded-md border p-button p-component w-full bg-[#F9F0DC] hover:bg-[#E5D9A2] text-black">
+        <button type="submit" class="rounded-md border p-button p-component w-full bg-[#F9F0DC] hover:bg-[#E5D9A2] text-black" @click="router.push('/Itinerary')">
           submit
         </button>
       </div>
