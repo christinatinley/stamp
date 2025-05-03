@@ -60,15 +60,11 @@ export default {
 
     <!-- Form Container -->
     <div class="bg-white mt-10 p-8 mx-auto w-full max-w-3xl rounded-lg shadow-md z-10">
+      <!-- Pass formData as a prop instead of using v-model on each property -->
       <component
         :is="currentFormComponent"
-        v-model:destination="formData.destination"
-        v-model:startDate="formData.startDate"
-        v-model:endDate="formData.endDate"
-        v-model:budget="formData.budget"
-        v-model:numberOfTravelers="formData.numberOfTravelers"
-        v-model:lodging="formData.lodging"
-        v-model:distanceWillingToTravel="formData.distanceWillingToTravel"
+        :formData="formData"  
+        @update:formData="updateFormData"
       />
     </div>
 
