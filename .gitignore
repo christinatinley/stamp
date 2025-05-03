@@ -38,3 +38,4 @@ coverage
 **/instance/
 .env
 .env.local
+new_env
