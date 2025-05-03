@@ -24,7 +24,7 @@ VECTOR_DB = []
 # Function to embed a chunk of text
 def embed_chunk(text):
     embedding = embeddings_model.embed_query(text)
-    return np.array(embedding)  # Ensure it's a numpy array
+    return np.array(embedding) 
 
 # Function to add a chunk to the database (embeds it and stores the text)
 def add_chunk_to_database(place_data):
@@ -81,7 +81,8 @@ def retrieve(query, index, top_n=5):
 
 # Function to build the places database
 def build_places(lat, lng):
-    places = k_b.get_places(lat, lng, 10)['places']
+    places = k_b.get_places(lat, lng, 1000)
+    places = places['places']
     for i,p in enumerate(places):
         print("Adding next chunk...", i)
         add_chunk_to_database(p)
@@ -101,7 +102,7 @@ def generate_itinerary(city_name, days, culture, history, art, nature, walking_t
     nature: {nature}/10
     walking tours: {walking_tours}/10
     shopping: {shopping}/10
-    When choosing a place, check to see if it is already in the itinerary. If it is, pick another activity."""
+    When choosing a place, check to see if it is already in the itinerary. If it is, pick another activity. Avoid picking the same place."""
     
     # Retrieve the top N places based on the query
     results = retrieve(query, index, top_n=3*days)

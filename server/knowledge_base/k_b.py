@@ -30,13 +30,13 @@ def get_city(city_name):
 #get the list of places by the latitude and longitude
 def get_places(lat, lng, radius):
     url = "https://places.googleapis.com/v1/places:searchNearby"
-    
+
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.location,places.formatted_address,places.rating,places.types,places.reviews,places.photos,places.types"
+        "X-Goog-FieldMask": "places.displayName,places.location,places.rating,places.types"
     }
-    
+
     body = {
         "locationRestriction": {
             "circle": {
@@ -46,8 +46,29 @@ def get_places(lat, lng, radius):
                 },
                 "radius": radius
             }
-        }
+        },
+        "includedTypes": [
+            "tourist_attraction",
+            "museum",
+            "art_gallery",
+            "park",
+            "shopping_mall",
+            "library",
+            "book_store",
+            "cafe",
+            "clothing_store",
+            "university",
+            "train_station",
+            "shoe_store",
+            "mosque",
+            "synagogue",
+            "church",
+            "night_club"
+        ],
+        "rankPreference": "POPULARITY"
     }
 
     response = requests.post(url, headers=headers, json=body)
     return response.json()
+
+

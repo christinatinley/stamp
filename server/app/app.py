@@ -20,7 +20,7 @@ class Persona:
 
 @app.route("/")
 def home():
-    city_name = "Chicago"
+    city_name = "New York City"
     persona = Persona(
         days=2,
         culture=10,

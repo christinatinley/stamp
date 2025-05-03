@@ -1,9 +1,2 @@
 flask==2.3.2
 requests==2.31.0
-mistralai
-langchain
-langchain_mistralai
-faiss-cpu
-torch
-python-dotenv
-numpy
