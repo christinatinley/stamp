@@ -1,10 +1,12 @@
 <script>
 import DatePicker from 'primevue/datepicker';
+import Select from 'primevue/select';
 
 export default {
   name: 'PageOneForm',
   components: {
-    DatePicker
+    DatePicker,
+    Select,
   },
   props: {
     formData: Object
@@ -15,8 +17,15 @@ export default {
         destination: '',
         startDate: '',
         endDate: '',
-        budget: ''  // Budget will hold the selected value
-      }
+        budget: '', 
+      },
+      budgetOptions: [
+        { label: 'Less than $500', value: 'lessThan500' },
+        { label: '$500 - $1000', value: 'between500And1000' },
+        { label: '$1000 - $2000', value: 'between1000And2000' },
+        { label: '$2000 - $3000', value: 'between2000And3000' },
+        { label: 'More than $3000', value: 'moreThan3000' },
+      ],
     };
   },
   watch: {
@@ -39,6 +48,7 @@ export default {
         id="destination"
         v-model="localForm.destination"
         type="text"
+        placeholder="city, state"
         class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
         required
       />
@@ -51,6 +61,7 @@ export default {
         <DatePicker
           v-model="localForm.startDate"
           name="startDate"
+          placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
           />
       </div>
@@ -60,6 +71,7 @@ export default {
         <DatePicker
           v-model="localForm.endDate"
           name="endDate"
+          placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
           />
       </div>
@@ -67,24 +79,19 @@ export default {
 
     <!-- Budget Input -->
     <div class="flex flex-col">
-      <label for="budget" class="mb-1 text-sm font-medium">Enter the maximum amount you are willing to spend on your trip:</label>
-      <input
+      <label for="budget" class="mb-1 text-sm font-medium">
+        How much do you want to spend on this trip?
+      </label>
+      <Select
         id="budget"
         v-model="localForm.budget"
-        type="text"
-        class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
-      />
-      <!-- <CascadeSelect
-        id="budget"
-        v-model="localForm.budget"
-        :options="budgetRanges"
+        :options="budgetOptions"
         optionLabel="label"
-        optionValue="value"
-        class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
-        placeholder="Select a budget range"
-        required
-      /> -->
-    </div>  
+        placeholder="select your maximum budget"
+        class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
+      />
+    </div>
+     
   </div>
 </template>
 
@@ -94,8 +101,12 @@ export default {
     font-size: 0.875rem; /* matching text-sm size for the labels */
   }
 
-  input, .p-datepicker {
+  input, .p-datepicker, .p-select {
     color: black;
     font-size: 0.875rem; /* matching text-sm size for the input text */
+  }
+
+  ::v-deep(.p-dropdown-items .p-dropdown-item) {
+    font-size: 0.875rem; 
   }
 </style>

@@ -37,6 +37,11 @@ export default {
       return [PageOneForm, PageTwoForm];
     },
   },
+  methods: {
+    updateFormData(updatedData) {
+      this.formData = { ...this.formData, ...updatedData };
+    }
+  }
 };
 </script>
 
