@@ -70,6 +70,8 @@ export default {
         :is="currentFormComponent"
         :formData="formData"  
         @update:formData="updateFormData"
+        :startDate="formData.startDate"
+        :endDate="formData.endDate"
       />
     </div>
 
