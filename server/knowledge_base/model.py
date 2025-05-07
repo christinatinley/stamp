@@ -6,6 +6,9 @@ import os
 from dotenv import load_dotenv
 from knowledge_base import k_b
 import torch
+import requests
+import time
+from requests.exceptions import RequestException
 
 # temp workaround
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -26,88 +29,130 @@ def embed_chunk(text):
     embedding = embeddings_model.embed_query(text)
     return np.array(embedding) 
 
+def embed_chunks_local(chunks):
+    embeddings_batch_response = client.embeddings.create(
+        model="mistral-embed",
+        inputs=chunks
+    )
+    return [embedding.embedding for embedding in embeddings_batch_response.data]
+
+
 # Function to add a chunk to the database (embeds it and stores the text)
-def add_chunk_to_database(place_data):
-    name = place_data.get('displayName', 'No Name')
-    address = place_data.get('formatted_address', 'No Address')
-    rating = place_data.get('rating', 'No Rating')
-    review = place_data.get('reviews', ['No Review'])[0]
-    types = place_data.get('types', ['No Type'])
-  
-    # Create a chunk of text containing the place's details
-    chunk = f"""Place Name: {name}
-Address: {address}
-Rating: {rating}
-Reviews: {review}
-Types: {', '.join(types)}
-"""
-    # Embed the chunk and add to the database
-    embedding = embed_chunk(chunk)
-    VECTOR_DB.append((embedding, chunk))
+def add_chunk_to_database(place_data_list, itinerary):
+    chunks = []
+
+    existing_names = {
+        line.split("Place Name: ")[1].split("\n")[0]
+        for line in itinerary
+        if "Place Name: " in line
+    }
+
+    existing_coords = {
+        (line.split("Latitude: ")[1].split("\n")[0], line.split("Longitude: ")[1].split("\n")[0])
+        for line in itinerary
+        if "Latitude: " in line and "Longitude: " in line
+    }
+
+    for place_data in place_data_list:
+        name_data = place_data.get('displayName', {'text': 'No Name'})
+        name = name_data.get('text', 'No Name') if isinstance(name_data, dict) else str(name_data)
+
+        address = place_data.get('formatted_address', 'No Address')
+        rating = place_data.get('rating', 'No Rating')
+        review = place_data.get('reviews', ['No Review'])[0]
+        types = place_data.get('types', ['No Type'])
+
+        location_data = place_data.get('location', {'latitude': 'No Latitude', 'longitude': 'No Longitude'})
+        lat = location_data.get('latitude', 'No Latitude')
+        lng = location_data.get('longitude', 'No Longitude')
+
+        chunk = f"""Place Name: {name}
+    Address: {address}
+    Rating: {rating}
+    Reviews: {review}
+    Types: {', '.join(types)}
+    Latitude: {lat}
+    Longitude: {lng}"""
+
+        if name not in existing_names and (str(lat), str(lng)) not in existing_coords:
+            chunks.append(chunk)
+            existing_names.add(name)
+            existing_coords.add((str(lat), str(lng)))
+
+    embeddings = embed_chunks_local(chunks)
+    for embedding, chunk in zip(embeddings, chunks):
+        VECTOR_DB.append((embedding, chunk))
 
 # Function to build a FAISS index from the stored vectors
 def build_faiss_index():
-    # Convert the vectors to a numpy array with float32 type
-    vectors = np.array([vec for vec, _ in VECTOR_DB], dtype=np.float32)
+    vectors_raw = [vec for vec, _ in VECTOR_DB]
 
-    # If there are no vectors, raise an error
+    for i, vec in enumerate(vectors_raw):
+        if not isinstance(vec, (list, np.ndarray)):
+            raise ValueError(f"Vector at index {i} is not a list or array: {vec}")
+        if isinstance(vec, list) and any(isinstance(sub, (list, tuple)) for sub in vec):
+            raise ValueError(f"Vector at index {i} is nested: {vec}")
+
+    vectors = np.array(vectors_raw, dtype=np.float32)
+
     if len(vectors) == 0:
         raise ValueError("No vectors to build FAISS index.")
-    
-    dimension = vectors.shape[1]  # Get the embedding dimension (number of features per vector)
 
-    # Check if all vectors have the correct dimension
-    if dimension != 1024:  # Adjust to match your model's output dimension
+    dimension = vectors.shape[1]
+    if dimension != 1024:
         raise ValueError(f"Expected dimension 1024, but got {dimension}")
 
-    # Create a FAISS index based on L2 distance (Euclidean distance)
     index = faiss.IndexFlatL2(dimension)
-    
-    # Normalize vectors using FAISS (ensure they are unit vectors)
-    faiss.normalize_L2(vectors)  # This normalizes the vectors in-place
-    
-    # Add vectors to the index
+    faiss.normalize_L2(vectors)
     index.add(vectors)
-    
+
     return index
+
 
 # Function to retrieve the top N results based on a query
 def retrieve(query, index, top_n=5):
     query_embedding = embed_chunk(query)
-    query_embedding = query_embedding / np.linalg.norm(query_embedding)  # Normalize query
+    query_embedding = query_embedding / np.linalg.norm(query_embedding)
     distances, indices = index.search(np.array([query_embedding]), top_n)
-    results = [VECTOR_DB[i][1] for i in indices[0]]  # Return the corresponding chunks
+    results = [VECTOR_DB[i][1] for i in indices[0]]
     return results
 
 # Function to build the places database
-def build_places(lat, lng):
-    places = k_b.get_places(lat, lng, 1000)
-    places = places['places']
-    for i,p in enumerate(places):
-        print("Adding next chunk...", i)
-        add_chunk_to_database(p)
+def build_places(cty_name, price_level, itinerary):
+    lat, lng = k_b.get_city(cty_name)
+    places = k_b.get_all_places(lat, lng, 1000, price_level)
+    add_chunk_to_database(places, itinerary)
+    return lat, lng
 
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, days, culture, history, art, nature, walking_tours, shopping):
-    lat, lng = k_b.get_city(city_name)  # Get coordinates for the city
-    build_places(lat, lng)  # Build the places database for the city
-    index = build_faiss_index()  # Build the FAISS index for place embeddings
-    
-    # Formulate the query for generating the itinerary
-    query = f"""Generate a {days}-day itinerary for {city_name}. 
-    This is how much I want to experience each of the following categories: 
-    culture: {culture}/10
-    history: {history}/10
-    art: {art}/10
-    nature: {nature}/10
-    walking tours: {walking_tours}/10
-    shopping: {shopping}/10
-    When choosing a place, check to see if it is already in the itinerary. If it is, pick another activity. Avoid picking the same place."""
-    
-    # Retrieve the top N places based on the query
-    results = retrieve(query, index, top_n=3*days)
-    itinerary = [chunk for chunk in results]  # Get the chunks corresponding to the top results
-    print("Generated itinerary:")
-    for i in itinerary:
-        print(i)
-    return itinerary
+def generate_itinerary(city_name, lat, lng, culture, history, art, nature, walking_tours, shopping, itinerary):
+    global VECTOR_DB
+    index = build_faiss_index()
+        
+    excluded_places = []
+    for place in itinerary:
+        name = place.split("Place Name: ")[1].split("\n")[0]
+        lat = place.split("Latitude: ")[1].split("\n")[0]
+        lng = place.split("Longitude: ")[1].split("\n")[0]
+        excluded_places.append(f"{name} (Latitude: {lat}, Longitude: {lng})")
+
+    excluded_places_str = ", ".join(excluded_places)
+    query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. 
+These are all the places I am already visiting. Do not pick any of these locations a second time: {excluded_places_str}.
+I am visiting {city_name}.
+I want to experience a variety of activities, but I have some preferences in how much I would like to visit each activity.
+
+This is how much I want to experience each of the following categories: 
+culture: {culture / 10}
+history: {history / 10}
+art: {art / 10}
+nature: {nature / 10}
+walking tours: {walking_tours / 10}
+shopping: {shopping / 10}
+Although I have some preferences, I want to visit different places in {city_name}"""
+
+    results = retrieve(query, index, top_n=1)
+    selected_text = results[0]
+    VECTOR_DB = [entry for entry in VECTOR_DB if entry[1] != selected_text]
+
+    return selected_text
