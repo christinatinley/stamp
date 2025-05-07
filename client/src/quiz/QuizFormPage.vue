@@ -20,6 +20,8 @@ export default {
         startDate: '',
         endDate: '',
         budget: '',
+        selectedDates: [],
+        blockedTimes: {},
         numberOfTravelers: '',
         lodging: '',
         distanceWillingToTravel: '',
