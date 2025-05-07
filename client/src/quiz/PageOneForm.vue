@@ -20,11 +20,10 @@ export default {
         budget: '', 
       },
       budgetOptions: [
-        { label: 'Less than $500', value: 'lessThan500' },
-        { label: '$500 - $1000', value: 'between500And1000' },
-        { label: '$1000 - $2000', value: 'between1000And2000' },
-        { label: '$2000 - $3000', value: 'between2000And3000' },
-        { label: 'More than $3000', value: 'moreThan3000' },
+        { label: '$', value: '$' },
+        { label: '$$', value: '$$' },
+        { label: '$$$', value: '$$$' },
+        { label: '$$$$', value: '$$$$' },
       ],
     };
   },
