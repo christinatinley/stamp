@@ -59,7 +59,7 @@ def generate_day(itinerary, city_name, persona):
         key = f"{start_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}"
         day[key] = suggestion
 
-        start_time = end_time
+        start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
 
         # Generate next suggestion
         suggestion = model.generate_itinerary(

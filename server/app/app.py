@@ -33,18 +33,25 @@ def home():
         shopping=2,
         price_level=2
     )
-
+    whole_trip = []
     itinerary, day = generate_day.generate_day([], city_name, persona)
-    return jsonify(day)
+    for d in range(persona.days):
+        whole_trip += [day]
+        itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
+    
+    whole_trip += [day]
+    return jsonify(whole_trip)
 
 @app.route('/itinerary', methods=['GET'])
 def generate_itinerary(city_name, persona):
-    suggestion = model.generate_first(city_name, persona.days, persona.culture, persona.history, persona.art, persona.nature, persona.walking_tours, persona.shopping, [])
+    whole_trip = []
+    itinerary, day = generate_day.generate_day([], city_name, persona)
+    for d in range(persona.days):
+        whole_trip += [day]
+        itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
     
-    
-    itinerary = [suggestion[0]]
-    itinerary += [model.generate_itinerary(city_name, lat, lng, persona.days, persona.culture, persona.history, persona.art, persona.nature, persona.walking_tours, persona.shopping)[1]]
-    return jsonify(itinerary)
+    return jsonify(whole_trip)
+
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

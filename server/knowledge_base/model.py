@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from knowledge_base import k_b
 import torch
 import requests
+import json
 
 # temp workaround
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -54,6 +55,33 @@ def embed_chunks(chunks):
         print(f"Error with the API request: {e}")
         return []
 
+# Caching function to avoid re-embedding the same chunks
+def load_embedding_cache(cache_file='embedding_cache.json'):
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_embedding_cache(cache, cache_file='embedding_cache.json'):
+    with open(cache_file, 'w') as f:
+        json.dump(cache, f)
+        
+def embed_chunks_with_cache(chunks, cache_file='embedding_cache.json'):
+    cache = load_embedding_cache(cache_file)
+    new_chunks = []
+    
+    for chunk in chunks:
+        if chunk not in cache:
+            new_chunks.append(chunk)
+    
+    embeddings = embed_chunks(new_chunks)  # Make the API call for uncached chunks
+    
+    for embedding, chunk in zip(embeddings, new_chunks):
+        cache[chunk] = embedding  # Cache the new embeddings
+    
+    save_embedding_cache(cache, cache_file)  # Save the updated cache
+    return [cache.get(chunk) for chunk in chunks]  # Return embeddings, both cached and new
+
 # Function to add a chunk to the database (embeds it and stores the text)
 def add_chunk_to_database(place_data_list, itinerary):
     chunks = []
@@ -94,7 +122,9 @@ def add_chunk_to_database(place_data_list, itinerary):
         if name not in existing_names and (str(lat), str(lng)) not in existing_coords:
             chunks.append(chunk)
 
-    embeddings = embed_chunks(chunks)
+    if not chunks:
+        print("womp womp bitch")
+    embeddings = embed_chunks_with_cache(chunks)  # Use cache-embedded function
     for embedding, chunk in zip(embeddings, chunks):
         VECTOR_DB.append((embedding, chunk))
 
@@ -138,10 +168,9 @@ def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature,
     global VECTOR_DB
     VECTOR_DB = []  # Clear previous embeddings
 
-    print(itinerary)
     build_places(lat, lng, price_level, itinerary)
     index = build_faiss_index()
-
+        
     excluded_places = []
     for place in itinerary:
         name = place.split("Place Name: ")[1].split("\n")[0]
