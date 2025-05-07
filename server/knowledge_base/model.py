@@ -118,17 +118,14 @@ def retrieve(query, index, top_n=5):
     return results
 
 # Function to build the places database
-def build_places(lat, lng, price_level, itinerary):
+def build_places(cty_name, price_level, itinerary):
+    lat, lng = k_b.get_city(cty_name)
     places = k_b.get_all_places(lat, lng, 1000, price_level)
     add_chunk_to_database(places, itinerary)
-
-def generate_first(city_name, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
-    lat, lng = k_b.get_city(city_name)
-    build_places(lat, lng, price_level, itinerary)
-    return generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary)
+    return lat, lng
 
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
+def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, itinerary):
     global VECTOR_DB
     print("generating next place!")
     index = build_faiss_index()

@@ -38,20 +38,19 @@ def estimate_time(chunk):
     time = max(place_time_estimates.get(t, 0) for t in types)
     return time
     
-def generate_day(itinerary, city_name, persona):
+def generate_day(itinerary, city_name, lat, lng, persona):
     day = {}
     start_time = datetime.strptime("09:00", "%H:%M")
     
-    suggestion = model.generate_first(
-        city_name,
-        persona.days, persona.culture, persona.history,
-        persona.art, persona.nature, persona.walking_tours,
-        persona.shopping, persona.price_level,
-        itinerary
-    )
-
     # Before noon
     while start_time.hour < 12:
+        suggestion = model.generate_itinerary(
+            city_name, lat, lng,
+            persona.days, persona.culture, persona.history,
+            persona.art, persona.nature, persona.walking_tours,
+            persona.shopping, 
+            itinerary
+        )
         itinerary.append(suggestion)
         lat, lng = extract_lat_lng(suggestion)
         duration = estimate_time(suggestion)
@@ -61,16 +60,6 @@ def generate_day(itinerary, city_name, persona):
 
         start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
 
-        # Generate next suggestion
-        suggestion = model.generate_itinerary(
-            city_name, lat, lng, persona.days,
-            persona.culture, persona.history,
-            persona.art, persona.nature,
-            persona.walking_tours, persona.shopping,
-            persona.price_level,
-            itinerary
-        )
-
     # Lunch
     lunch_end = start_time + timedelta(hours=1)
     key = f"{start_time.strftime('%H:%M')}–{lunch_end.strftime('%H:%M')}"
@@ -79,6 +68,14 @@ def generate_day(itinerary, city_name, persona):
 
     # Afternoon until 7PM
     while start_time.hour < 19:
+        # Generate next suggestion
+        suggestion = model.generate_itinerary(
+            city_name, lat, lng, persona.days,
+            persona.culture, persona.history,
+            persona.art, persona.nature,
+            persona.walking_tours, persona.shopping,
+            itinerary
+        )
         itinerary.append(suggestion)
         lat, lng = extract_lat_lng(suggestion)
         duration = estimate_time(suggestion)
@@ -88,15 +85,5 @@ def generate_day(itinerary, city_name, persona):
 
         day[key] = suggestion
         start_time = end_time
-
-        # Generate next suggestion
-        suggestion = model.generate_itinerary(
-            city_name, lat, lng, persona.days,
-            persona.culture, persona.history,
-            persona.art, persona.nature,
-            persona.walking_tours, persona.shopping,
-            persona.price_level,
-            itinerary
-        )
 
     return itinerary, day

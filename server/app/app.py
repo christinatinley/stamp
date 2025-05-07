@@ -33,11 +33,14 @@ def home():
         shopping=5,
         price_level=2
     )
+    itinerary = []
+    lat, lng = model.build_places(city_name, persona.price_level, itinerary)
+
     whole_trip = []
-    itinerary, day = generate_day.generate_day([], city_name, persona)
+    itinerary, day = generate_day.generate_day([], city_name, lat, lng, persona)
     for d in range(persona.days - 1):
         whole_trip += [day]
-        itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
+        itinerary, day = generate_day.generate_day(itinerary, city_name, lat, lng, persona)
     
     whole_trip += [day]
     return jsonify(whole_trip)
