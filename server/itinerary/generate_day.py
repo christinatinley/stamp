@@ -80,7 +80,7 @@ def generate_day(itinerary, city_name, lat, lng, persona, curr_day):
             print(invalid_end_time)
             start_time =  invalid_end_time + timedelta(minutes=15)
         else:
-            key = f"{start_time.strftime("%Y-%m-%d %H:%M")}–{end_time.strftime("%Y-%m-%d %H:%M")}"
+            key = f"{start_time.strftime('%Y-%m-%d %H:%M')}–{end_time.strftime('%Y-%m-%d %H:%M')}"
             day[key] = suggestion
 
             start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer

@@ -1,20 +1,17 @@
 <script>
 import MultiSelect from 'primevue/multiselect';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     name: 'PageFiveForm',
-    props: {
-        formData: Object,
-    },
     components: {
         MultiSelect,
     },
+    computed: {
+        ...mapGetters(['formData']),
+    },
     data() {
         return {
-            localForm: {
-                transportationToDestination: [],
-                transportationDuringTrip: [],
-            },
             transportationOptions: [
                 { label: 'Car', value: 'car' },
                 { label: 'Bus', value: 'bus' },
@@ -25,13 +22,8 @@ export default {
             ],   
         };
     },
-    watch: {
-        localForm: {
-            handler(newVal) {
-                this.$emit('update:formData', newVal);
-            },
-            deep: true,
-        },
+    methods: {
+        ...mapActions(['setTransportationToDestination', 'setTransportationDuringTrip']),
     },
 }
 </script>
@@ -45,9 +37,11 @@ export default {
             </label>
             <MultiSelect
                 id="transportationToDestination"
-                v-model="localForm.transportationToDestination"
+                :modelValue="this.formData.transportationToDestination"
+                @update:modelValue="setTransportationToDestination($event)"
                 :options="transportationOptions"
                 optionLabel="label"
+                optionValue="value"
                 placeholder="select your transportation options"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
@@ -60,7 +54,8 @@ export default {
             </label>
             <MultiSelect
                 id="transportationDuringTrip"
-                v-model="localForm.transportationDuringTrip"
+                :modelValue="this.formData.transportationDuringTrip"
+                @update:modelValue="setTransportationDuringTrip($event)"
                 :options="transportationOptions"
                 optionLabel="label"
                 placeholder="select your transportation options"

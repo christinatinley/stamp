@@ -16,11 +16,11 @@ export default {
   data() {
     return {
       budgetOptions: [
-        { label: '$', value: '$' },
-        { label: '$$', value: '$$' },
-        { label: '$$$', value: '$$$' },
-        { label: '$$$$', value: '$$$$' },
-        { label: '$$$$$', value: '$$$$$' },
+        { label: '$', value: 0},
+        { label: '$$', value: 1 },
+        { label: '$$$', value: 2 },
+        { label: '$$$$', value: 3 },
+        { label: '$$$$$', value: 4 },
       ],
     };
   },
@@ -52,7 +52,7 @@ export default {
         <label class="mb-1 text-sm font-medium">Start Date</label>
         <DatePicker
           :modelValue="this.formData.startDate"
-          @update:modelValue="setStartDate($event.target.value)"
+          @update:modelValue="setStartDate($event)"
           name="startDate"
           placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
@@ -62,7 +62,8 @@ export default {
       <div class="flex flex-col w-1/2">
         <label class="mb-1 text-sm font-medium">End Date</label>
         <DatePicker
-          v-model="this.formData.endDate"
+          :modelValue="this.formData.endDate"
+          @update:modelValue="setEndDate($event)"
           name="endDate"
           placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
@@ -77,12 +78,12 @@ export default {
       </label>
       <Select
         id="budget"
-        v-model="this.formData.budget"
+        :modelValue="this.formData.budget"
+        @update:modelValue="setBudget($event.value)"
         :options="budgetOptions"
         optionLabel="label"
         placeholder="select your maximum budget"
         class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
-        @input="setBudget($event.target.value)"
       />
     </div>
      

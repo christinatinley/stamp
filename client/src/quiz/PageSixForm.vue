@@ -1,6 +1,7 @@
 <script>
 import Slider from 'primevue/slider';
 import Button from 'primevue/button';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     name: 'PageSixForm',
@@ -8,30 +9,28 @@ export default {
         Slider,
         Button,
     },
-    props: {
-        formData: Object
+    computed: {
+        // Assuming you have a Vuex store and formData is a getter
+        ...mapGetters(['formData']),
+    },
+    methods: {
+        // Assuming you have Vuex actions to set the experience ratings
+        ...mapActions(['setExperiences',  'fetchHome']),
+        async submitForm() {
+            await this.fetchHome();
+        }
     },
     data() {
         return {
-            localForm: {
-                experiences: [],
-            },
             experiences: [
-                { name: 'historical sites', rating: 0 },
-                { name: 'museums', rating: 0 },
-                { name: 'adventure activities', rating: 0 },
+                { name: 'exploring local culture', rating: 0 },
+                { name: 'historical sites & museums', rating: 0 },
+                { name: 'art sites & museums', rating: 0 },
                 { name: 'nature exploration', rating: 0 },
-                { name: 'local cuisine', rating: 0 },
+                { name: 'tours', rating: 0 },
+                { name: 'shopping', rating: 0 },
             ],
         }
-    },
-    watch: {
-        experiences: {
-            handler(newVal) {
-                this.$emit('update:formData', { experiences: newVal });
-            },
-            deep: true,
-        },
     },
 }
 </script>
@@ -49,6 +48,7 @@ export default {
            </label>
            <Slider
              v-model="experience.rating"
+            @change="setExperiences({ experience: experience.name, rating: experience.rating })"
              :min="0"
              :max="10"
              :step="1"
@@ -66,7 +66,8 @@ export default {
     <button
         type="submit"
         class="bg-[#CB769E] text-white font-semibold py-2 px-4 rounded-md hover:bg-[#b35f87] transition duration-200"
-    >
+        @click="submitForm"
+        >
         submit
     </button>
     </div>

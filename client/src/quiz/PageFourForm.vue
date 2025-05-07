@@ -1,20 +1,17 @@
 <script>
 import MultiSelect from 'primevue/multiselect';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     name: 'PageFourForm',
-    props: {
-        formData: Object,
-    },
     components: {
         MultiSelect,
     },
+    computed: {
+        ...mapGetters(['formData']),
+    },
     data() {
         return {
-            localForm: {
-                cuisine: [],
-                dietaryRestrictions: [],
-            },
             cuisineOptions: [
                 { label: 'Cuban', value: 'cuban' },
                 { label: 'American', value: 'american' },
@@ -31,13 +28,8 @@ export default {
             ],
         };
     },
-    watch: {
-        localForm: {
-            handler(newVal) {
-                this.$emit('update:formData', newVal);
-            },
-            deep: true,
-        },
+    methods: {
+        ...mapActions(['setCuisine', 'setDietaryRestrictions']),
     },
 }
 </script>
@@ -52,9 +44,11 @@ export default {
             </label>
             <MultiSelect
                 id="cuisine"
-                v-model="localForm.cuisine"
+                :modelValue="this.formData.cuisines"
+                @update:modelValue="setCuisine($event)"
                 :options="cuisineOptions"
                 optionLabel="label"
+                optionValue="value"
                 placeholder="select your preferred cuisines"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
@@ -67,9 +61,11 @@ export default {
             </label>
             <MultiSelect
                 id="dietaryRestrictions"
-                v-model="localForm.dietaryRestrictions"
+                :modelValue="this.formData.dietaryRestrictions"
+                @update:modelValue="setDietaryRestrictions($event)"
                 :options="dietaryOptions"
                 optionLabel="label"
+                optionValue="value"
                 placeholder="select your dietary restrictions"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />

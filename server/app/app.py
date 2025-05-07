@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import requests
 import sys
 import os
@@ -9,6 +10,7 @@ from knowledge_base import model
 from itinerary import generate_day
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 class Persona:
     def __init__(self, start_day, end_day, culture, history, art, nature, walking_tours, shopping, price_level, breaks):

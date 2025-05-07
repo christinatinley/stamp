@@ -1,15 +1,17 @@
+import axios from 'axios';
+
 const state = {
     formData: {
         destination: '',
         startDate: '',
         endDate: '',
         budget: '',
-        selectedDates: [],
         blockedTimes: {},
         numberOfTravelers: '',
         lodging: '',
-        cuisine: [],
+        cuisines: [],
         dietaryRestrictions: [],
+        experiences: [],
       },
 }   
 
@@ -18,6 +20,26 @@ const getters = {
 }
 
 const actions = {
+    async fetchHome({commit}) {
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/');
+            console.log('Home response:', response.data);
+        } catch (error) {
+            console.error('Error fetching home data:', error);
+        }
+    },
+
+    async fetchItinerary({ state }) {
+      try {
+        const response = await axios.post('/api/itinerary', state.formData);
+        console.log('Itinerary response:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching itinerary:', error);
+        throw error;
+      }
+    },
+
     setDestination({ commit }, destination) {
       commit('updateDestination', destination);
     },
@@ -30,11 +52,8 @@ const actions = {
     setBudget({ commit }, budget) {
       commit('updateBudget', budget);
     },
-    setSelectedDates({ commit }, selectedDates) {
-      commit('updateSelectedDates', selectedDates);
-    },
-    setBlockedTimes({ commit }, blockedTimes) {
-      commit('updateBlockedTimes', blockedTimes);
+    setBlockedTimes({ commit }, payload) {
+      commit('updateBlockedTimes', payload);
     },
     setNumberOfTravelers({ commit }, numberOfTravelers) {
       commit('updateNumberOfTravelers', numberOfTravelers);
@@ -45,9 +64,12 @@ const actions = {
     setCuisine({ commit }, cuisine) {
       commit('updateCuisine', cuisine);
     },
-    setDietaryRestrictions({ commit }, dietaryRestrictions) {
-      commit('updateDietaryRestrictions', dietaryRestrictions);
+    setDietaryRestrictions({ commit }, dietaryRestriction) {
+      commit('updateDietaryRestrictions', dietaryRestriction);
     },
+    setExperiences({ commit }, payload) {
+      commit('updateExperiences', payload);
+    }
   };
   
 
@@ -68,13 +90,12 @@ const mutations = {
         state.formData.budget = budget;
         console.log('Budget updated:', budget);
     },
-    updateSelectedDates(state, selectedDates) {
-        state.formData.selectedDates = selectedDates;
-        console.log('Selected dates updated:', selectedDates);
-    },
-    updateBlockedTimes(state, blockedTimes) {
-        state.formData.blockedTimes = blockedTimes;
-        console.log('Blocked times updated:', blockedTimes);
+    updateBlockedTimes(state, { date, times }) {
+        state.formData.blockedTimes = {
+          ...state.formData.blockedTimes,
+          [date]: times,
+        };
+        console.log('Blocked times updated:', state.formData.blockedTimes);
     },
     updateNumberOfTravelers(state, numberOfTravelers) {
         state.formData.numberOfTravelers = numberOfTravelers;
@@ -85,13 +106,21 @@ const mutations = {
         console.log('Lodging updated:', lodging);
     },
     updateCuisine(state, cuisine) {
-        state.formData.cuisine = cuisine;
-        console.log('Cuisine updated:', cuisine);
+        console.log('Cuisine:', cuisine);
+        state.formData.cuisines = cuisine;
+        console.log('Blocked times updated:', state.formData.cuisine);
     },
-    updateDietaryRestrictions(state, dietaryRestrictions) {
-        state.formData.dietaryRestrictions = dietaryRestrictions;
-        console.log('Dietary restrictions updated:', dietaryRestrictions);
+    updateDietaryRestrictions(state, dietaryRestriction) {
+        console.log('Dietary restrictions:', dietaryRestriction);
+        state.formData.dietaryRestrictions = dietaryRestriction;
+        console.log('Dietary restrictions updated:', state.formData.dietaryRestrictions);
     },
+    updateExperiences(state, {experience, rating}) {
+        state.formData.experiences = {
+            ...state.formData.experiences,
+            [experience]: rating,
+        };
+    }
 }
 
 export default {
