@@ -3,6 +3,7 @@ import NavBar from '@/components/NavBar.vue';
 import PageOneForm from '@/quiz/PageOneForm.vue';
 import PageTwoForm from '@/quiz/PageTwoForm.vue';
 import PageThreeForm from '@/quiz/PageThreeForm.vue';
+import PageFourForm from '@/quiz/PageFourForm.vue';
 import Paginator from 'primevue/paginator';
 
 export default {
@@ -12,6 +13,7 @@ export default {
     PageOneForm,
     PageTwoForm,
     PageThreeForm,
+    PageFourForm,
     Paginator,
   },
   data() {
@@ -26,6 +28,7 @@ export default {
         blockedTimes: {},
         numberOfTravelers: '',
         lodging: '',
+        cuisine: [],
       },
     };
   },
@@ -37,7 +40,7 @@ export default {
       return this.pages[this.currentPage] || null;
     },
     pages() {
-      return [PageOneForm, PageTwoForm, PageThreeForm];
+      return [PageOneForm, PageTwoForm, PageThreeForm, PageFourForm];
     },
   },
   methods: {
