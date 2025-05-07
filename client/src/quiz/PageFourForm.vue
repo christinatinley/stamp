@@ -55,7 +55,7 @@ export default {
                 v-model="localForm.cuisine"
                 :options="cuisineOptions"
                 optionLabel="label"
-                placeholder="Select your preferred cuisines"
+                placeholder="select your preferred cuisines"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
         </div>
@@ -70,7 +70,7 @@ export default {
                 v-model="localForm.dietaryRestrictions"
                 :options="dietaryOptions"
                 optionLabel="label"
-                placeholder="Select your dietary restrictions"
+                placeholder="select your dietary restrictions"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
         </div>

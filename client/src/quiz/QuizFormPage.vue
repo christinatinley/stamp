@@ -4,6 +4,7 @@ import PageOneForm from '@/quiz/PageOneForm.vue';
 import PageTwoForm from '@/quiz/PageTwoForm.vue';
 import PageThreeForm from '@/quiz/PageThreeForm.vue';
 import PageFourForm from '@/quiz/PageFourForm.vue';
+import PageFiveForm from '@/quiz/PageFiveForm.vue';
 import Paginator from 'primevue/paginator';
 
 export default {
@@ -14,6 +15,7 @@ export default {
     PageTwoForm,
     PageThreeForm,
     PageFourForm,
+    PageFiveForm,
     Paginator,
   },
   data() {
@@ -29,6 +31,7 @@ export default {
         numberOfTravelers: '',
         lodging: '',
         cuisine: [],
+        dietaryRestrictions: [],
       },
     };
   },
@@ -40,7 +43,7 @@ export default {
       return this.pages[this.currentPage] || null;
     },
     pages() {
-      return [PageOneForm, PageTwoForm, PageThreeForm, PageFourForm];
+      return [PageOneForm, PageTwoForm, PageThreeForm, PageFourForm, PageFiveForm];
     },
   },
   methods: {
