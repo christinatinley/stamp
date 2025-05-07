@@ -37,16 +37,33 @@ def estimate_time(chunk):
     types = types.split(", ")
     time = max(place_time_estimates.get(t, 0) for t in types)
     return time
-    
-def generate_day(itinerary, city_name, lat, lng, persona):
+
+def parse_time_range(range):
+    start_str, end_str = range.split("–")
+    start = datetime.strptime(start_str.strip(), "%Y-%m-%d %H:%M")
+    end = datetime.strptime(end_str.strip(), "%Y-%m-%d %H:%M")
+    return start, end
+
+
+def ranges_overlap(start1, end1, start2, end2):
+    return max(start1, start2) < min(end1, end2)
+
+def is_not_valid_activity(start_time, end_time, excluded):
+    for time in excluded:
+        excl_start, excl_end = parse_time_range(time)
+        if ranges_overlap(start_time, end_time, excl_start, excl_end):
+            return excl_end
+    return None
+
+def generate_day(itinerary, city_name, lat, lng, persona, curr_day):
     day = {}
     start_time = datetime.strptime("09:00", "%H:%M")
+    start_time = datetime.combine(curr_day, start_time.time())
     
-    # Before noon
-    while start_time.hour < 12:
+    while start_time.hour < 19:
         suggestion = model.generate_itinerary(
             city_name, lat, lng,
-            persona.days, persona.culture, persona.history,
+            persona.culture, persona.history,
             persona.art, persona.nature, persona.walking_tours,
             persona.shopping, 
             itinerary
@@ -55,35 +72,43 @@ def generate_day(itinerary, city_name, lat, lng, persona):
         lat, lng = extract_lat_lng(suggestion)
         duration = estimate_time(suggestion)
         end_time = start_time + timedelta(hours=duration)
-        key = f"{start_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}"
-        day[key] = suggestion
+        
+        invalid_end_time = is_not_valid_activity(start_time, end_time, persona.breaks)
+        if invalid_end_time:
+            # skip!
+            print("we skipping this one chat")
+            print(invalid_end_time)
+            start_time =  invalid_end_time + timedelta(minutes=15)
+        else:
+            key = f"{start_time.strftime("%Y-%m-%d %H:%M")}–{end_time.strftime("%Y-%m-%d %H:%M")}"
+            day[key] = suggestion
 
-        start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
+            start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
 
-    # Lunch
-    lunch_end = start_time + timedelta(hours=1)
-    key = f"{start_time.strftime('%H:%M')}–{lunch_end.strftime('%H:%M')}"
-    day[key] = "Lunch"
-    start_time = lunch_end
+    # # Lunch
+    # lunch_end = start_time + timedelta(hours=1)
+    # key = f"{start_time.strftime('%H:%M')}–{lunch_end.strftime('%H:%M')}"
+    # day[key] = "Lunch"
+    # start_time = lunch_end
 
-    # Afternoon until 7PM
-    while start_time.hour < 19:
-        # Generate next suggestion
-        suggestion = model.generate_itinerary(
-            city_name, lat, lng, persona.days,
-            persona.culture, persona.history,
-            persona.art, persona.nature,
-            persona.walking_tours, persona.shopping,
-            itinerary
-        )
-        itinerary.append(suggestion)
-        lat, lng = extract_lat_lng(suggestion)
-        duration = estimate_time(suggestion)
-        end_time = start_time + timedelta(hours=duration)
+    # # Afternoon until 7PM
+    # while start_time.hour < 19:
+    #     # Generate next suggestion
+    #     suggestion = model.generate_itinerary(
+    #         city_name, lat, lng, persona.days,
+    #         persona.culture, persona.history,
+    #         persona.art, persona.nature,
+    #         persona.walking_tours, persona.shopping,
+    #         itinerary
+    #     )
+    #     itinerary.append(suggestion)
+    #     lat, lng = extract_lat_lng(suggestion)
+    #     duration = estimate_time(suggestion)
+    #     end_time = start_time + timedelta(hours=duration)
 
-        key = f"{start_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}"
+    #     key = f"{start_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}"
 
-        day[key] = suggestion
-        start_time = end_time
+    #     day[key] = suggestion
+    #     start_time = end_time
 
     return itinerary, day

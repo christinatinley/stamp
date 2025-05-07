@@ -125,9 +125,8 @@ def build_places(cty_name, price_level, itinerary):
     return lat, lng
 
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, itinerary):
+def generate_itinerary(city_name, lat, lng, culture, history, art, nature, walking_tours, shopping, itinerary):
     global VECTOR_DB
-    print("generating next place!")
     index = build_faiss_index()
         
     excluded_places = []
@@ -140,7 +139,7 @@ def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature,
     excluded_places_str = ", ".join(excluded_places)
     query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. 
 These are all the places I am already visiting. Do not pick any of these locations a second time: {excluded_places_str}.
-I am visiting {city_name} for {days} days.
+I am visiting {city_name}.
 I want to experience a variety of activities, but I have some preferences in how much I would like to visit each activity.
 
 This is how much I want to experience each of the following categories: 
