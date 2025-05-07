@@ -25,17 +25,17 @@ def home():
     city_name = "New York City"
     persona = Persona(
         days=2,
-        culture=10,
+        culture=7,
         history=7,
         art=5,
-        nature=2,
-        walking_tours=3,
-        shopping=2,
+        nature=7,
+        walking_tours=4,
+        shopping=5,
         price_level=2
     )
     whole_trip = []
     itinerary, day = generate_day.generate_day([], city_name, persona)
-    for d in range(persona.days):
+    for d in range(persona.days - 1):
         whole_trip += [day]
         itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
     

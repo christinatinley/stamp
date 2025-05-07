@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 from knowledge_base import k_b
 import torch
 import requests
-import json
+import time
+from requests.exceptions import RequestException
 
 # temp workaround
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -28,59 +29,13 @@ def embed_chunk(text):
     embedding = embeddings_model.embed_query(text)
     return np.array(embedding) 
 
-# Function to embed multiple chunks of text
-def embed_chunks(chunks):
-    url = "https://api.mistral.ai/v1/embeddings"
-    headers = {
-        "Authorization": "Bearer " + api_key,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "mistral-embed",
-        "input": chunks
-    }
+def embed_chunks_local(chunks):
+    embeddings_batch_response = client.embeddings.create(
+        model="mistral-embed",
+        inputs=chunks
+    )
+    return [embedding.embedding for embedding in embeddings_batch_response.data]
 
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        response_data = response.json()
-
-        embeddings = response_data.get("data", [])
-        if not embeddings:
-            raise ValueError("No embeddings found in response.")
-
-        return [embedding.get("embedding", []) for embedding in embeddings]
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error with the API request: {e}")
-        return []
-
-# Caching function to avoid re-embedding the same chunks
-def load_embedding_cache(cache_file='embedding_cache.json'):
-    if os.path.exists(cache_file):
-        with open(cache_file, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_embedding_cache(cache, cache_file='embedding_cache.json'):
-    with open(cache_file, 'w') as f:
-        json.dump(cache, f)
-        
-def embed_chunks_with_cache(chunks, cache_file='embedding_cache.json'):
-    cache = load_embedding_cache(cache_file)
-    new_chunks = []
-    
-    for chunk in chunks:
-        if chunk not in cache:
-            new_chunks.append(chunk)
-    
-    embeddings = embed_chunks(new_chunks)  # Make the API call for uncached chunks
-    
-    for embedding, chunk in zip(embeddings, new_chunks):
-        cache[chunk] = embedding  # Cache the new embeddings
-    
-    save_embedding_cache(cache, cache_file)  # Save the updated cache
-    return [cache.get(chunk) for chunk in chunks]  # Return embeddings, both cached and new
 
 # Function to add a chunk to the database (embeds it and stores the text)
 def add_chunk_to_database(place_data_list, itinerary):
@@ -121,22 +76,29 @@ def add_chunk_to_database(place_data_list, itinerary):
 
         if name not in existing_names and (str(lat), str(lng)) not in existing_coords:
             chunks.append(chunk)
+            existing_names.add(name)
+            existing_coords.add((str(lat), str(lng)))
 
-    if not chunks:
-        print("womp womp bitch")
-    embeddings = embed_chunks_with_cache(chunks)  # Use cache-embedded function
+    embeddings = embed_chunks_local(chunks)
     for embedding, chunk in zip(embeddings, chunks):
         VECTOR_DB.append((embedding, chunk))
 
 # Function to build a FAISS index from the stored vectors
 def build_faiss_index():
-    vectors = np.array([vec for vec, _ in VECTOR_DB], dtype=np.float32)
+    vectors_raw = [vec for vec, _ in VECTOR_DB]
+
+    for i, vec in enumerate(vectors_raw):
+        if not isinstance(vec, (list, np.ndarray)):
+            raise ValueError(f"Vector at index {i} is not a list or array: {vec}")
+        if isinstance(vec, list) and any(isinstance(sub, (list, tuple)) for sub in vec):
+            raise ValueError(f"Vector at index {i} is nested: {vec}")
+
+    vectors = np.array(vectors_raw, dtype=np.float32)
 
     if len(vectors) == 0:
         raise ValueError("No vectors to build FAISS index.")
 
     dimension = vectors.shape[1]
-
     if dimension != 1024:
         raise ValueError(f"Expected dimension 1024, but got {dimension}")
 
@@ -145,6 +107,7 @@ def build_faiss_index():
     index.add(vectors)
 
     return index
+
 
 # Function to retrieve the top N results based on a query
 def retrieve(query, index, top_n=5):
@@ -161,14 +124,13 @@ def build_places(lat, lng, price_level, itinerary):
 
 def generate_first(city_name, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
     lat, lng = k_b.get_city(city_name)
+    build_places(lat, lng, price_level, itinerary)
     return generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary)
 
 # Function to generate an itinerary based on city and other preferences
 def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
     global VECTOR_DB
-    VECTOR_DB = []  # Clear previous embeddings
-
-    build_places(lat, lng, price_level, itinerary)
+    print("generating next place!")
     index = build_faiss_index()
         
     excluded_places = []
@@ -194,4 +156,7 @@ shopping: {shopping / 10}
 Although I have some preferences, I want to visit different places in {city_name}"""
 
     results = retrieve(query, index, top_n=1)
-    return results[0]
+    selected_text = results[0]
+    VECTOR_DB = [entry for entry in VECTOR_DB if entry[1] != selected_text]
+
+    return selected_text
