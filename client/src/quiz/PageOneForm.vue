@@ -15,12 +15,6 @@ export default {
   },
   data() {
     return {
-      localForm: {
-        destination: '',
-        startDate: '',
-        endDate: '',
-        budget: '', 
-      },
       budgetOptions: [
         { label: '$', value: '$' },
         { label: '$$', value: '$$' },
@@ -40,7 +34,7 @@ export default {
   <div class="flex flex-col gap-6">
     <!-- Destination Input -->
     <div class="flex flex-col">
-      <label for="destination" class="mb-1 text-sm font-medium">Where will you be going?</label>
+      <label class="mb-1 text-sm font-medium">Where will you be going?</label>
       <input
         id="destination"
         v-model="this.formData.destination"
@@ -55,7 +49,7 @@ export default {
     <!-- Start and End Dates -->
     <div class="flex gap-4">
       <div class="flex flex-col w-1/2">
-        <label for="startDate" class="mb-1 text-sm font-medium">Start Date</label>
+        <label class="mb-1 text-sm font-medium">Start Date</label>
         <DatePicker
           :modelValue="this.formData.startDate"
           @update:modelValue="setStartDate($event.target.value)"
@@ -66,7 +60,7 @@ export default {
       </div>
 
       <div class="flex flex-col w-1/2">
-        <label for="endDate" class="mb-1 text-sm font-medium">End Date</label>
+        <label class="mb-1 text-sm font-medium">End Date</label>
         <DatePicker
           v-model="this.formData.endDate"
           name="endDate"
@@ -78,7 +72,7 @@ export default {
 
     <!-- Budget Input -->
     <div class="flex flex-col">
-      <label for="budget" class="mb-1 text-sm font-medium">
+      <label class="mb-1 text-sm font-medium">
         How much do you want to spend on this trip?
       </label>
       <Select
