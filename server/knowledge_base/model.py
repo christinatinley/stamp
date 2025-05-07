@@ -56,9 +56,8 @@ def embed_chunks(chunks):
         return []
 
 # Function to add a chunk to the database (embeds it and stores the text)
-def add_chunk_to_database(place_data_list):
+def add_chunk_to_database(place_data_list, itinerary):
     chunks = []
-    
     for place_data in place_data_list:
         name_data = place_data.get('displayName', {'text': 'No Name'})
         name = name_data.get('text', 'No Name') if isinstance(name_data, dict) else str(name_data)
@@ -68,13 +67,26 @@ def add_chunk_to_database(place_data_list):
         review = place_data.get('reviews', ['No Review'])[0]
         types = place_data.get('types', ['No Type'])
 
+        location_data = place_data.get('location', {'latitude': 'No Latitude', 'longitude': 'No Longitude'})
+        lat = location_data.get('latitude', 'No Latitude')
+        lng = location_data.get('longitude', 'No Longitude')
+
         # Create a chunk of text containing the place's details
         chunk = f"""Place Name: {name}
     Address: {address}
     Rating: {rating}
     Reviews: {review}
     Types: {', '.join(types)}
-    """
+    Latitude: {lat}
+    Longitude: {lng}"""
+
+    # Build a set of names already in the itinerary
+    existing_names = {
+        line.split("Place Name: ")[1].split("\n")[0]
+        for line in itinerary
+        if "Place Name: " in line
+    }
+    if name not in existing_names:
         chunks.append(chunk)
 
     # Embed the chunks and add to database
@@ -117,32 +129,42 @@ def retrieve(query, index, top_n=5):
     return results
 
 # Function to build the places database
-def build_places(lat, lng):
-    places = k_b.get_places(lat, lng, 1000)
-    places = places['places']
-    add_chunk_to_database(places)
+def build_places(lat, lng, price_level, itinerary):
+    places = k_b.get_all_places(lat, lng, 1000, price_level)
+    add_chunk_to_database(places, itinerary)
     
+def generate_first(city_name, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
+    lat, lng = k_b.get_city(city_name)  # Get latitude and longitude for the city
+    return generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary)
+
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, itinerary):
-    build_places(lat, lng)  # Build the places database for the city
+def generate_itinerary(city_name, lat, lng, days, culture, history, art, nature, walking_tours, shopping, price_level, itinerary):
+    build_places(lat, lng, price_level, itinerary)  # Build the places database for the city
     index = build_faiss_index()  # Build the FAISS index for place embeddings
     
-    # Formulate the query for generating the itinerary
-    query = f"""Generate a {days}-day itinerary for {city_name}. 
-    This is how much I want to experience each of the following categories: 
-    culture: {culture}/10
-    history: {history}/10
-    art: {art}/10
-    nature: {nature}/10
-    walking tours: {walking_tours}/10
-    shopping: {shopping}/10
-    These are all the places I am already visiting: {itinerary}
-    Please suggest activities that are not already in the itinerary. If it is, pick another activity. Avoid picking the same place twice."""
+    excluded_places = []
+    for place in itinerary:
+        name = place.split("Place Name: ")[1].split("\n")[0]  # Extract place name
+        lat = place.split("Latitude: ")[1].split("\n")[0]  # Extract latitude
+        lng = place.split("Longitude: ")[1].split("\n")[0]  # Extract longitude
+        excluded_places.append(f"{name} (Latitude: {lat}, Longitude: {lng})")
+
+    # Build the query to exclude the places already in the itinerary
+    excluded_places_str = ", ".join(excluded_places)
+    query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. 
+These are all the places I am already visiting. Do not pick any of these locations a second time: {excluded_places_str}.
+I am visiting {city_name} for {days} days.
+I want to experience a variety of activities, but I have some preferences in how much I would like to visit each activity.
+
+This is how much I want to experience each of the following categories: 
+culture: {culture / 10}
+history: {history / 10}
+art: {art / 10}
+nature: {nature / 10}
+walking tours: {walking_tours / 10}
+shopping: {shopping / 10}
+Although I have some preferences, I want to visit different places in {city_name}"""
     
     # Retrieve the top N places based on the query
-    results = retrieve(query, index, top_n=3*days)
-    itinerary = [chunk for chunk in results]  # Get the chunks corresponding to the top results
-    print("Generated itinerary:")
-    for i in itinerary:
-        print(i)
-    return itinerary
+    results = retrieve(query, index, top_n=1)
+    return results[0]
