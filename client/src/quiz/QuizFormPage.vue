@@ -5,6 +5,7 @@ import PageTwoForm from '@/quiz/PageTwoForm.vue';
 import PageThreeForm from '@/quiz/PageThreeForm.vue';
 import PageFourForm from '@/quiz/PageFourForm.vue';
 import PageFiveForm from '@/quiz/PageFiveForm.vue';
+import PageSixForm from '@/quiz/PageSixForm.vue';
 import Paginator from 'primevue/paginator';
 
 export default {
@@ -16,6 +17,7 @@ export default {
     PageThreeForm,
     PageFourForm,
     PageFiveForm,
+    PageSixForm,
     Paginator,
   },
   data() {
@@ -43,7 +45,7 @@ export default {
       return this.pages[this.currentPage] || null;
     },
     pages() {
-      return [PageOneForm, PageTwoForm, PageThreeForm, PageFourForm, PageFiveForm];
+      return [PageOneForm, PageTwoForm, PageThreeForm, PageFourForm, PageFiveForm, PageSixForm];
     },
   },
   methods: {

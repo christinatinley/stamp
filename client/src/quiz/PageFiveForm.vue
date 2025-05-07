@@ -48,7 +48,7 @@ export default {
                 v-model="localForm.transportationToDestination"
                 :options="transportationOptions"
                 optionLabel="label"
-                placeholder="Select your transportation options"
+                placeholder="select your transportation options"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
         </div>
@@ -63,7 +63,7 @@ export default {
                 v-model="localForm.transportationDuringTrip"
                 :options="transportationOptions"
                 optionLabel="label"
-                placeholder="Select your transportation options"
+                placeholder="select your transportation options"
                 class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
             />
         </div>
