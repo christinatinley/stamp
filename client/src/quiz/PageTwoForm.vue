@@ -1,17 +1,16 @@
 <script>
 import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'PageTwoForm',
-  props: {
-    formData: Object,
-  },
   components: {
     MultiSelect,
     DatePicker,
   },
   computed: {
+    ...mapGetters(['formData']),
     selectedDates: {
       get() {
         return this.formData.selectedDates;
@@ -44,6 +43,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setBlockedTimes']),
     updateTime(date, type, value) {
       const updated = { ...this.blockedTimes };
       if (!updated[date]) {

@@ -1,6 +1,8 @@
 <script>
+import itineraryStore from '@/modules/itineraryStore';
 import DatePicker from 'primevue/datepicker';
 import Select from 'primevue/select';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'PageOneForm',
@@ -8,8 +10,8 @@ export default {
     DatePicker,
     Select,
   },
-  props: {
-    formData: Object
+  computed: {
+    ...mapGetters(['formData']),
   },
   data() {
     return {
@@ -28,14 +30,9 @@ export default {
       ],
     };
   },
-  watch: {
-    localForm: {
-      handler(newVal) {
-        this.$emit('update:formData', newVal);
-      },
-      deep: true
-    }
-  }
+  methods: {
+    ...mapActions(['setDestination', 'setStartDate', 'setEndDate', 'setBudget']),
+  },
 };
 </script>
 
@@ -46,11 +43,12 @@ export default {
       <label for="destination" class="mb-1 text-sm font-medium">Where will you be going?</label>
       <input
         id="destination"
-        v-model="localForm.destination"
+        v-model="this.formData.destination"
         type="text"
         placeholder="city, state"
         class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
         required
+        @input="setDestination($event.target.value)"
       />
     </div>
 
@@ -59,7 +57,8 @@ export default {
       <div class="flex flex-col w-1/2">
         <label for="startDate" class="mb-1 text-sm font-medium">Start Date</label>
         <DatePicker
-          v-model="localForm.startDate"
+          :modelValue="this.formData.startDate"
+          @update:modelValue="setStartDate($event.target.value)"
           name="startDate"
           placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
@@ -69,7 +68,7 @@ export default {
       <div class="flex flex-col w-1/2">
         <label for="endDate" class="mb-1 text-sm font-medium">End Date</label>
         <DatePicker
-          v-model="localForm.endDate"
+          v-model="this.formData.endDate"
           name="endDate"
           placeholder="MM/DD/YYYY"
           class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
@@ -84,11 +83,12 @@ export default {
       </label>
       <Select
         id="budget"
-        v-model="localForm.budget"
+        v-model="this.formData.budget"
         :options="budgetOptions"
         optionLabel="label"
         placeholder="select your maximum budget"
         class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
+        @input="setBudget($event.target.value)"
       />
     </div>
      
