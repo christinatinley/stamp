@@ -23,6 +23,7 @@ client = Mistral(api_key=api_key)
 embeddings_model = MistralAIEmbeddings(model="mistral-embed", mistral_api_key=api_key)
 
 VECTOR_DB = []
+FOOD_VECTOR_DB = []
 
 # Function to embed a chunk of text
 def embed_chunk(text):
@@ -38,7 +39,7 @@ def embed_chunks_local(chunks):
 
 
 # Function to add a chunk to the database (embeds it and stores the text)
-def add_chunk_to_database(place_data_list, itinerary):
+def add_chunk_to_database(place_data_list, itinerary, food=False):
     chunks = []
 
     existing_names = {
@@ -80,12 +81,16 @@ def add_chunk_to_database(place_data_list, itinerary):
             existing_coords.add((str(lat), str(lng)))
 
     embeddings = embed_chunks_local(chunks)
-    for embedding, chunk in zip(embeddings, chunks):
-        VECTOR_DB.append((embedding, chunk))
+    if food:
+        for embedding, chunk in zip(embeddings, chunks):
+            FOOD_VECTOR_DB.append((embedding, chunk))
+    else:
+        for embedding, chunk in zip(embeddings, chunks):
+            VECTOR_DB.append((embedding, chunk))
 
 # Function to build a FAISS index from the stored vectors
-def build_faiss_index():
-    vectors_raw = [vec for vec, _ in VECTOR_DB]
+def build_faiss_index(food=False):
+    vectors_raw = [vec for vec, _ in VECTOR_DB] if not food else [vec for vec, _ in FOOD_VECTOR_DB]
 
     for i, vec in enumerate(vectors_raw):
         if not isinstance(vec, (list, np.ndarray)):
@@ -110,11 +115,11 @@ def build_faiss_index():
 
 
 # Function to retrieve the top N results based on a query
-def retrieve(query, index, top_n=5):
+def retrieve(query, index, top_n=5, food=False):
     query_embedding = embed_chunk(query)
     query_embedding = query_embedding / np.linalg.norm(query_embedding)
     distances, indices = index.search(np.array([query_embedding]), top_n)
-    results = [VECTOR_DB[i][1] for i in indices[0]]
+    results = [VECTOR_DB[i][1] for i in indices[0]] if not food else [FOOD_VECTOR_DB[i][1] for i in indices[0]]
     return results
 
 # Function to build the places database
@@ -122,10 +127,12 @@ def build_places(cty_name, price_level, itinerary):
     lat, lng = k_b.get_city(cty_name)
     places = k_b.get_all_places(lat, lng, 1000, price_level)
     add_chunk_to_database(places, itinerary)
+    food_places = k_b.get_food(lat, lng, 1000, price_level)
+    add_chunk_to_database(food_places, itinerary, food=True)
     return lat, lng
 
 # Function to generate an itinerary based on city and other preferences
-def generate_itinerary(city_name, lat, lng, culture, history, art, nature, walking_tours, shopping, itinerary):
+def generate_itinerary(city_name, start_time, lat, lng, culture, history, art, nature, walking_tours, shopping, itinerary):
     global VECTOR_DB
     index = build_faiss_index()
         
@@ -137,7 +144,7 @@ def generate_itinerary(city_name, lat, lng, culture, history, art, nature, walki
         excluded_places.append(f"{name} (Latitude: {lat}, Longitude: {lng})")
 
     excluded_places_str = ", ".join(excluded_places)
-    query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. 
+    query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. I am trying to find an activity for {start_time.strftime("%Y-%m-%d %H:%M")}. I have some preferences for the types of activities I would like to do, but I am open to suggestions. I am not interested in visiting any of the following places again: {excluded_places_str}.
 These are all the places I am already visiting. Do not pick any of these locations a second time: {excluded_places_str}.
 I am visiting {city_name}.
 I want to experience a variety of activities, but I have some preferences in how much I would like to visit each activity.
@@ -155,4 +162,17 @@ Although I have some preferences, I want to visit different places in {city_name
     selected_text = results[0]
     VECTOR_DB = [entry for entry in VECTOR_DB if entry[1] != selected_text]
 
+    return selected_text
+
+def generate_food(city_name, start_time):
+    global FOOD_VECTOR_DB
+    print("Yummy in my tummy")
+    index = build_faiss_index(food=True)
+    query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. I am trying to find a restaurant to go to at {start_time.strftime("%Y-%m-%d %H:%M")}. Please choose something good!"""
+    
+    results = retrieve(query, index, top_n=1, food=True)
+    selected_text = results[0]
+    print(selected_text)
+    FOOD_VECTOR_DB = [entry for entry in FOOD_VECTOR_DB if entry[1] != selected_text]
+    
     return selected_text

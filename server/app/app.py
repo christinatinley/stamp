@@ -25,18 +25,18 @@ class Persona:
 
 @app.route("/")
 def home():
-    city_name = "New York City"
+    city_name = "Paris, France"
     persona = Persona(
-        start_day="2025-06-19",
-        end_day="2025-06-20",
-        culture=7,
+        start_day="2025-06-20",
+        end_day="2025-06-21",
+        culture=8,
         history=7,
-        art=5,
-        nature=7,
-        walking_tours=4,
-        shopping=5,
+        art=3,
+        nature=4,
+        walking_tours=5,
+        shopping=9,
         price_level=2,
-        breaks= ["2025-06-19 10:00–2025-06-19 10:30", "2025-06-20 12:00–2025-06-20 13:30"] 
+        breaks= ["2025-06-20 11:00–2025-06-19 12:00", "2025-06-20 11:00–2025-06-20 12:00"] 
     )
     itinerary = []
     lat, lng = model.build_places(city_name, persona.price_level, itinerary)
