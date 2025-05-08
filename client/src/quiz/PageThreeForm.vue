@@ -1,13 +1,14 @@
 <script>
 import Select from 'primevue/select';
+import { mapActions, mapGetters } from 'vuex';
 
 export default{
   name: 'PageThreeForm',
   components: {
     Select,
   },
-  props: {
-    formData: Object
+  computed: {
+    ...mapGetters(['formData']),
   },
   data() {
     return {
@@ -27,13 +28,8 @@ export default{
       ],
     };
   },
-  watch: {
-    localForm: {
-      handler(newVal) {
-        this.$emit('update:formData', newVal);
-      },
-      deep: true
-    }
+  methods: {
+    ...mapActions(['setNumberOfTravelers', 'setLodging']),
   }
 }
 </script>
@@ -47,7 +43,8 @@ export default{
       </label>
       <Select
         id="numberOfTravelers"
-        v-model="localForm.numberOfTravelers"
+        :modelValue="this.formData.numberOfTravelers"
+        @update:modelValue="setNumberOfTravelers($event.value)"
         :options="numberOptions"
         optionLabel="label"
         placeholder="Select number of travelers"
@@ -62,7 +59,8 @@ export default{
       </label>
       <Select
         id="lodging"
-        v-model="localForm.lodging"
+        :modelValue="this.formData.lodging"
+        @update:modelValue="setLodging($event.value)"
         :options="lodgingOptions"
         optionLabel="label"
         placeholder="Select lodging type"

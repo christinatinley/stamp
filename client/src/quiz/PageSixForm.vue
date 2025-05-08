@@ -1,6 +1,8 @@
 <script>
 import Slider from 'primevue/slider';
 import Button from 'primevue/button';
+import { mapActions, mapGetters } from 'vuex';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'PageSixForm',
@@ -8,30 +10,40 @@ export default {
         Slider,
         Button,
     },
-    props: {
-        formData: Object
+    computed: {
+        // Assuming you have a Vuex store and formData is a getter
+        ...mapGetters(['formData']),
     },
-    data() {
-        return {
-            localForm: {
-                experiences: [],
-            },
-            experiences: [
-                { name: 'historical sites', rating: 0 },
-                { name: 'museums', rating: 0 },
-                { name: 'adventure activities', rating: 0 },
-                { name: 'nature exploration', rating: 0 },
-                { name: 'local cuisine', rating: 0 },
-            ],
+    methods: {
+        // Assuming you have Vuex actions to set the experience ratings
+        ...mapActions(['setExperiences',  'fetchHome', 'fetchItinerary']),
+        async submitForm() {
+            if (this.loading) return; // prevent duplicate click
+            this.loading = true;      // set loading to true
+            try {
+                await this.fetchItinerary();
+                this.$router.push('/Itinerary');
+            } catch (err) {
+                console.error('Error fetching itinerary:', err);
+            } finally {
+                this.loading = false;   // reset loading state
+            }
         }
     },
-    watch: {
-        experiences: {
-            handler(newVal) {
-                this.$emit('update:formData', { experiences: newVal });
-            },
-            deep: true,
-        },
+    data() {
+        const router = useRouter();
+        return {
+            experiences: [
+                { name: 'exploring local culture', rating: 0 },
+                { name: 'historical sites & museums', rating: 0 },
+                { name: 'art sites & museums', rating: 0 },
+                { name: 'nature exploration', rating: 0 },
+                { name: 'tours', rating: 0 },
+                { name: 'shopping', rating: 0 },
+            ],
+            router,
+            loading: false,
+        }
     },
 }
 </script>
@@ -49,6 +61,7 @@ export default {
            </label>
            <Slider
              v-model="experience.rating"
+            @change="setExperiences({ experience: experience.name, rating: experience.rating })"
              :min="0"
              :max="10"
              :step="1"
@@ -65,9 +78,11 @@ export default {
     <div class="flex justify-center">
     <button
         type="submit"
-        class="bg-[#CB769E] text-white font-semibold py-2 px-4 rounded-md hover:bg-[#b35f87] transition duration-200"
-    >
-        submit
+        class="bg-[#CB769E] text-white font-semibold py-2 px-4 rounded-md hover:bg-[#b35f87] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="loading"
+        @click="submitForm"
+        >
+        {{ loading ? 'loading...' : 'submit' }}
     </button>
     </div>
 

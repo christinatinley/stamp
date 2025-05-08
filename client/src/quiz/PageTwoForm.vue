@@ -1,65 +1,60 @@
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker';
+import { useStore } from 'vuex';
 
-export default {
-  name: 'PageTwoForm',
-  props: {
-    formData: Object,
-  },
-  components: {
-    MultiSelect,
-    DatePicker,
-  },
-  computed: {
-    selectedDates: {
-      get() {
-        return this.formData.selectedDates;
-      },
-      set(value) {
-        const updated = { ...this.formData, selectedDates: value };
-        this.$emit('update:formData', updated);
-      },
-    },
-    blockedTimes: {
-      get() {
-        return this.formData.blockedTimes;
-      },
-      set(value) {
-        const updated = { ...this.formData, blockedTimes: value };
-        this.$emit('update:formData', updated);
-      },
-    },
-    tripDates() {
-      const start = new Date(this.formData.startDate);
-      const end = new Date(this.formData.endDate);
-      const dateArray = [];
-      const currentDate = new Date(start);
-      while (currentDate <= end) {
-        const formattedDate = currentDate.toISOString().split('T')[0];
-        dateArray.push(formattedDate);
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      return dateArray;
-    },
-  },
-  methods: {
-    updateTime(date, type, value) {
-      const updated = { ...this.blockedTimes };
-      if (!updated[date]) {
-        updated[date] = { start: null, end: null };
-      }
-      updated[date][type] = value;
-      this.blockedTimes = updated;
-    },
-  },
-};
+const store = useStore();
+const formData = computed(() => store.getters.formData);
+
+const selectedDates = ref([]);
+
+onMounted(() => {
+  if (formData.value?.blockedTimes) {
+    selectedDates.value = Object.keys(formData.value.blockedTimes);
+  }
+});
+
+// console.log('blockedTimes:', formData.value.blockedTimes['2025-05-13'].end);
+// console.log('selectedDates:', selectedDates.value);
+// console.log('start time for first date:', formData.value.blockedTimes[selectedDates.value[0]]?.start);
+
+const tripDates = computed(() => {
+  console.log('Form data:', formData.value.blockedTimes);
+  const start = new Date(formData.value.startDate);
+  const end = new Date(formData.value.endDate);
+  const dateArray = [];
+  const currentDate = new Date(start);
+  while (currentDate <= end) {
+    const formattedDate = currentDate.toISOString().split('T')[0];
+    dateArray.push(formattedDate);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return dateArray;
+});
+
+function updateTime(date, type, value) {
+   // Get hours and minutes from selected time
+  const hours = value.getHours();
+  const minutes = value.getMinutes();
+
+  // Create a Date object using the date + selected time
+  const combinedDateTime = new Date(date + 'T00:00:00');
+  combinedDateTime.setHours(hours);
+  combinedDateTime.setMinutes(minutes);
+
+  const currentTimes = formData.value.blockedTimes[date] || { start: null, end: null };
+  const newTimes = { ...currentTimes, [type]: combinedDateTime };
+  console.log('Saving datetime:', newTimes);
+
+  store.dispatch('setBlockedTimes', { date, times: newTimes });
+}
+
 </script>
 
 <template>
   <div class="p-4">
-    <!-- Multiselect Dates to Block out -->
-    <label for="startDate" class="mb-1 text-sm font-medium">Select dates to block:</label>
+    <label class="mb-1 text-sm font-medium">Select dates to block:</label>
     <MultiSelect
       v-model="selectedDates"
       :options="tripDates"
@@ -68,7 +63,6 @@ export default {
       class="w-full md:w-80"
     />
 
-    <!-- Per-date Time Block Inputs -->
     <div v-if="selectedDates.length" class="mt-6 space-y-6">
       <div
         v-for="date in selectedDates"
@@ -81,7 +75,7 @@ export default {
           <div>
             <label class="block text-sm font-medium mb-1">Start Time</label>
             <DatePicker
-              :modelValue="blockedTimes[date]?.start || null"
+              :modelValue="formData.value?.blockedTimes[date]?.start || null"
               @update:modelValue="updateTime(date, 'start', $event)"
               timeOnly
               class="w-full"
@@ -90,7 +84,7 @@ export default {
           <div>
             <label class="block text-sm font-medium mb-1">End Time</label>
             <DatePicker
-              :modelValue="blockedTimes[date]?.end || null"
+              :modelValue="formData.value?.blockedTimes[date]?.end || null"
               @update:modelValue="updateTime(date, 'end', $event)"
               timeOnly
               class="w-full"
@@ -101,6 +95,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 label {

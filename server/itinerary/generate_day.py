@@ -40,6 +40,7 @@ def estimate_time(chunk):
     return time
 
 def parse_time_range(range):
+    print("split pls", range.split("–"), "\n\n")
     start_str, end_str = range.split("–")
     start = datetime.strptime(start_str.strip(), "%Y-%m-%d %H:%M")
     end = datetime.strptime(end_str.strip(), "%Y-%m-%d %H:%M")
@@ -50,7 +51,10 @@ def ranges_overlap(start1, end1, start2, end2):
     return max(start1, start2) < min(end1, end2)
 
 def is_not_valid_activity(start_time, end_time, excluded):
+    print("test")
+    print("excluded", excluded)
     for time in excluded:
+        print("time", time)
         excl_start, excl_end = parse_time_range(time)
         if ranges_overlap(start_time, end_time, excl_start, excl_end):
             return excl_end
@@ -87,7 +91,7 @@ def generate_day(itinerary, city_name, lat, lng, persona, curr_day):
             print(invalid_end_time)
             start_time =  invalid_end_time + timedelta(minutes=15)
         else:
-            key = f"{start_time.strftime("%Y-%m-%d %H:%M")}–{end_time.strftime("%Y-%m-%d %H:%M")}"
+            key = f"{start_time.strftime('%Y-%m-%d %H:%M')}–{end_time.strftime('%Y-%m-%d %H:%M')}"
             day[key] = suggestion
 
             start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
