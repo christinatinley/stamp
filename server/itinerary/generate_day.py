@@ -17,6 +17,7 @@ place_time_estimates = {
     "mosque": 1, 
     "synagogue": 1,
     "church": 1,
+    "restaurant": 1.5
 }
 def extract_lat_lng(chunk):
     # Split the chunk by line breaks to isolate lines
@@ -63,15 +64,21 @@ def generate_day(itinerary, city_name, lat, lng, persona, curr_day):
     day = {}
     start_time = datetime.strptime("09:00", "%H:%M")
     start_time = datetime.combine(curr_day, start_time.time())
+    lunch = False
     
     while start_time.hour < 19:
-        suggestion = model.generate_itinerary(
-            city_name, lat, lng,
-            persona.culture, persona.history,
-            persona.art, persona.nature, persona.walking_tours,
-            persona.shopping, 
-            itinerary
-        )
+        suggestion = None
+        if start_time.hour >= 12 and start_time.hour <= 13 and not lunch:
+            lunch = True
+            suggestion = model.generate_food(city_name, start_time)
+        else: 
+            suggestion = model.generate_itinerary(
+                city_name, start_time, lat, lng,
+                persona.culture, persona.history,
+                persona.art, persona.nature, persona.walking_tours,
+                persona.shopping, 
+                itinerary
+            )
         itinerary.append(suggestion)
         lat, lng = extract_lat_lng(suggestion)
         duration = estimate_time(suggestion)
@@ -89,30 +96,11 @@ def generate_day(itinerary, city_name, lat, lng, persona, curr_day):
 
             start_time = end_time + timedelta(minutes=15) # 15-minute break/travel buffer
 
-    # # Lunch
-    # lunch_end = start_time + timedelta(hours=1)
-    # key = f"{start_time.strftime('%H:%M')}–{lunch_end.strftime('%H:%M')}"
-    # day[key] = "Lunch"
-    # start_time = lunch_end
-
-    # # Afternoon until 7PM
-    # while start_time.hour < 19:
-    #     # Generate next suggestion
-    #     suggestion = model.generate_itinerary(
-    #         city_name, lat, lng, persona.days,
-    #         persona.culture, persona.history,
-    #         persona.art, persona.nature,
-    #         persona.walking_tours, persona.shopping,
-    #         itinerary
-    #     )
-    #     itinerary.append(suggestion)
-    #     lat, lng = extract_lat_lng(suggestion)
-    #     duration = estimate_time(suggestion)
-    #     end_time = start_time + timedelta(hours=duration)
-
-    #     key = f"{start_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}"
-
-    #     day[key] = suggestion
-    #     start_time = end_time
-
+    # dinner!
+    dinner = model.generate_food(city_name, start_time)
+    duration = estimate_time(dinner)
+    end_time = start_time + timedelta(hours=duration)
+    key = f"{start_time.strftime("%Y-%m-%d %H:%M")}–{end_time.strftime("%Y-%m-%d %H:%M")}"
+    day[key] = dinner
+    
     return itinerary, day
