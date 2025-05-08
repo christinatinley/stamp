@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 import sys
@@ -55,8 +55,25 @@ def home():
         
     return jsonify(whole_trip)
 
-@app.route('/itinerary', methods=['GET'])
-def generate_itinerary(city_name, persona):
+@app.route('/itinerary', methods=['POST'])
+def generate_itinerary():
+    data = request.get_json()
+    city_name = data['city_name']
+    persona_data = data['persona']
+
+    persona = Persona(
+        start_day=persona_data['start_day'],
+        end_day=persona_data['end_day'],
+        culture=persona_data['culture'],
+        history=persona_data['history'],
+        art=persona_data['art'],
+        nature=persona_data['nature'],
+        walking_tours=persona_data['walking_tours'],
+        shopping=persona_data['shopping'],
+        price_level=persona_data['price_level'],
+        breaks=persona_data['breaks']
+    )
+
     whole_trip = []
     itinerary, day = generate_day.generate_day([], city_name, persona)
     for d in range(persona.days):

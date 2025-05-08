@@ -15,9 +15,9 @@ export default {
     },
     methods: {
         // Assuming you have Vuex actions to set the experience ratings
-        ...mapActions(['setExperiences',  'fetchHome']),
+        ...mapActions(['setExperiences',  'fetchHome', 'fetchItinerary']),
         async submitForm() {
-            await this.fetchHome();
+            await this.fetchItinerary();
         }
     },
     data() {
