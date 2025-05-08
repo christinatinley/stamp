@@ -36,6 +36,44 @@ def get_city(city_name):
             lng = location["longitude"]
             return lat, lng
 
+def get_food(lat, lng, radius, price_level, include_unpriced = True):
+    url = "https://places.googleapis.com/v1/places:searchNearby"
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": API_KEY,
+        "X-Goog-FieldMask": "places.displayName,places.location,places.rating,places.types,places.priceLevel"
+    }
+
+    body = {
+        "locationRestriction": {
+            "circle": {
+                "center": {"latitude": lat, "longitude": lng},
+                "radius": radius
+            }
+        },
+        "includedTypes": ["restaurant"],
+        "rankPreference": "POPULARITY"
+    }
+
+    response = requests.post(url, headers=headers, json=body)
+    data = response.json()
+
+    max_val = PRICE_ORDER.get(price_level, 4)
+
+    all_filtered_places = []
+    for place in data.get("places", []):
+        price = place.get("priceLevel")
+        if price is None:
+            if include_unpriced:
+                all_filtered_places.append(place)
+        else:
+            price_val = PRICE_ORDER.get(price)
+            if price_val is not None and price_val <= max_val:
+                all_filtered_places.append(place)
+
+    return all_filtered_places
+
 #get the list of places by the latitude and longitude
 def get_all_places(lat, lng, radius, price_level, include_unpriced=True):
     url = "https://places.googleapis.com/v1/places:searchNearby"
