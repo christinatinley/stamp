@@ -45,7 +45,7 @@ const actions = {
                 console.log('Times:', times);
                 const start = formatDateTime(times.start);
                 const end = formatDateTime(times.end);  
-                return `${start} - ${end}`;
+                return `${start}–${end}`;
             })
         }
 

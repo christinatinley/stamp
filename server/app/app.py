@@ -74,11 +74,24 @@ def generate_itinerary():
         breaks=persona_data['breaks']
     )
 
+    itinerary = []
+    lat, lng = model.build_places(city_name, persona.price_level, itinerary)
+
     whole_trip = []
-    itinerary, day = generate_day.generate_day([], city_name, persona)
-    for d in range(persona.days):
+    curr_day = datetime.strptime(persona.start_day, "%Y-%m-%d")
+    end_day = datetime.strptime(persona.end_day, "%Y-%m-%d")
+    itinerary = []
+    while curr_day <= end_day:
+        print("Today:", curr_day)
+        itinerary, day = generate_day.generate_day(itinerary, city_name, lat, lng, persona, curr_day)
         whole_trip += [day]
-        itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
+        curr_day = curr_day + timedelta(days=1)
+
+    # whole_trip = []
+    # itinerary, day = generate_day.generate_day([], city_name, persona)
+    # for d in range(persona.days):
+    #     whole_trip += [day]
+    #     itinerary, day = generate_day.generate_day(itinerary, city_name, persona)
     
     return jsonify(whole_trip)
 
