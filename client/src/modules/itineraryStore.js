@@ -13,10 +13,12 @@ const state = {
         dietaryRestrictions: [],
         experiences: [],
       },
+    itinerary: [],
 }   
 
 const getters = {
     formData: (state) => state.formData,
+    itinerary: (state) => state.itinerary,
 }
 
 const actions = {
@@ -29,7 +31,7 @@ const actions = {
         }
     },
 
-    async fetchItinerary({state}) {
+    async fetchItinerary({state, commit}) {
       try {
         const personaData = {
             start_day: formatDate(state.formData.startDate),
@@ -55,6 +57,15 @@ const actions = {
             persona: personaData,
         });
         console.log('Itinerary response:', response.data);
+        const itineraryData = response.data;
+        const parsedItinerary = itineraryData.map(dayObj => {
+            const newDayObj = {};
+            for (const [time, infoString] of Object.entries(dayObj)) {
+              newDayObj[time] = parsePlaceInfo(infoString);
+            }
+            return newDayObj;
+        });
+        commit('setItinerary', parsedItinerary);
         return response.data;
       } catch (error) {
         console.error('Error fetching itinerary:', error);
@@ -142,7 +153,11 @@ const mutations = {
             ...state.formData.experiences,
             [experience]: rating,
         };
-    }
+    },
+    setItinerary(state, itinerary) {
+        state.itinerary = itinerary;
+        console.log('Itinerary updated:', state.itinerary);
+    },
 }
 
 function formatDateTime(date) {
@@ -161,6 +176,45 @@ function formatDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+
+  function parsePlaceInfo(placeString) {
+    const lines = placeString.split('\n').map(line => line.trim()).filter(Boolean);
+    const result = {};
+  
+    lines.forEach(line => {
+      const [key, ...rest] = line.split(':');
+      const value = rest.join(':').trim();
+  
+      switch (key) {
+        case 'Place Name':
+          result.placeName = value;
+          break;
+        case 'Address':
+          result.address = value;
+          break;
+        case 'Rating':
+          result.rating = parseFloat(value);
+          break;
+        case 'Reviews':
+          result.reviews = value;
+          break;
+        case 'Types':
+          result.types = value.split(',').map(v => v.trim());
+          break;
+        case 'Latitude':
+          result.latitude = parseFloat(value);
+          break;
+        case 'Longitude':
+          result.longitude = parseFloat(value);
+          break;
+        default:
+          result[key] = value; // fallback
+      }
+    });
+  
+    return result;
+  }
+  
 
 export default {
     state,

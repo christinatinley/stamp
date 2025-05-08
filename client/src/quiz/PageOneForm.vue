@@ -39,7 +39,7 @@ export default {
         id="destination"
         v-model="this.formData.destination"
         type="text"
-        placeholder="city, state"
+        placeholder="city name"
         class="rounded-md border border-gray-300 outline-none w-full text-black p-2"
         required
         @input="setDestination($event.target.value)"
@@ -79,9 +79,10 @@ export default {
       <Select
         id="budget"
         :modelValue="this.formData.budget"
-        @update:modelValue="setBudget($event.value)"
+        @update:modelValue="setBudget($event)"
         :options="budgetOptions"
         optionLabel="label"
+        optionValue="value"
         placeholder="select your maximum budget"
         class="rounded-md border border-gray-300 outline-none w-full text-black text-sm p-2"
       />

@@ -2,6 +2,7 @@
 import Slider from 'primevue/slider';
 import Button from 'primevue/button';
 import { mapActions, mapGetters } from 'vuex';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'PageSixForm',
@@ -17,10 +18,20 @@ export default {
         // Assuming you have Vuex actions to set the experience ratings
         ...mapActions(['setExperiences',  'fetchHome', 'fetchItinerary']),
         async submitForm() {
-            await this.fetchItinerary();
+            if (this.loading) return; // prevent duplicate click
+            this.loading = true;      // set loading to true
+            try {
+                await this.fetchItinerary();
+                this.$router.push('/Itinerary');
+            } catch (err) {
+                console.error('Error fetching itinerary:', err);
+            } finally {
+                this.loading = false;   // reset loading state
+            }
         }
     },
     data() {
+        const router = useRouter();
         return {
             experiences: [
                 { name: 'exploring local culture', rating: 0 },
@@ -30,6 +41,8 @@ export default {
                 { name: 'tours', rating: 0 },
                 { name: 'shopping', rating: 0 },
             ],
+            router,
+            loading: false,
         }
     },
 }
@@ -65,10 +78,11 @@ export default {
     <div class="flex justify-center">
     <button
         type="submit"
-        class="bg-[#CB769E] text-white font-semibold py-2 px-4 rounded-md hover:bg-[#b35f87] transition duration-200"
+        class="bg-[#CB769E] text-white font-semibold py-2 px-4 rounded-md hover:bg-[#b35f87] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="loading"
         @click="submitForm"
         >
-        submit
+        {{ loading ? 'loading...' : 'submit' }}
     </button>
     </div>
 
