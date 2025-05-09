@@ -15,12 +15,7 @@ onMounted(() => {
   }
 });
 
-// console.log('blockedTimes:', formData.value.blockedTimes['2025-05-13'].end);
-// console.log('selectedDates:', selectedDates.value);
-// console.log('start time for first date:', formData.value.blockedTimes[selectedDates.value[0]]?.start);
-
 const tripDates = computed(() => {
-  console.log('Form data:', formData.value.blockedTimes);
   const start = new Date(formData.value.startDate);
   const end = new Date(formData.value.endDate);
   const dateArray = [];
@@ -45,7 +40,6 @@ function updateTime(date, type, value) {
 
   const currentTimes = formData.value.blockedTimes[date] || { start: null, end: null };
   const newTimes = { ...currentTimes, [type]: combinedDateTime };
-  console.log('Saving datetime:', newTimes);
 
   store.dispatch('setBlockedTimes', { date, times: newTimes });
 }

@@ -25,7 +25,6 @@ const actions = {
     async fetchHome() {
         try {
             const response = await axios.get('http://127.0.0.1:5000/');
-            console.log('Home response:', response.data);
         } catch (error) {
             console.error('Error fetching home data:', error);
         }
@@ -44,19 +43,17 @@ const actions = {
             shopping: state.formData.experiences['shopping'] || 0,
             price_level: state.formData.budget,
             breaks: Object.values(state.formData.blockedTimes).map(times => {
-                console.log('Times:', times);
                 const start = formatDateTime(times.start);
                 const end = formatDateTime(times.end);  
                 return `${start}–${end}`;
             })
         }
 
-        console.log('Persona data:', personaData);
         const response = await axios.post('http://127.0.0.1:5000/itinerary', {
             city_name: state.formData.destination,
             persona: personaData,
         });
-        console.log('Itinerary response:', response.data);
+
         const itineraryData = response.data;
         const parsedItinerary = itineraryData.map(dayObj => {
             const newDayObj = {};
@@ -109,44 +106,33 @@ const actions = {
 const mutations = {
     updateDestination(state, destination) {
         state.formData.destination = destination;
-        console.log('Destination updated:', destination);
     },
     updateStartDate(state, startDate) {
         state.formData.startDate = startDate;
-        console.log('Start date updated:', startDate);
     },
     updateEndDate(state, endDate) {
         state.formData.endDate = endDate;
-        console.log('End date updated:', endDate);
     },
     updateBudget(state, budget) {
         state.formData.budget = budget;
-        console.log('Budget updated:', budget);
     },
     updateBlockedTimes(state, { date, times }) {
         state.formData.blockedTimes = {
           ...state.formData.blockedTimes,
           [date]: times,
         };
-        console.log('Blocked times updated:', state.formData.blockedTimes);
     },
     updateNumberOfTravelers(state, numberOfTravelers) {
         state.formData.numberOfTravelers = numberOfTravelers;
-        console.log('Number of travelers updated:', numberOfTravelers);
     },
     updateLodging(state, lodging) {
         state.formData.lodging = lodging;
-        console.log('Lodging updated:', lodging);
     },
     updateCuisine(state, cuisine) {
-        console.log('Cuisine:', cuisine);
         state.formData.cuisines = cuisine;
-        console.log('Blocked times updated:', state.formData.cuisine);
     },
     updateDietaryRestrictions(state, dietaryRestriction) {
-        console.log('Dietary restrictions:', dietaryRestriction);
         state.formData.dietaryRestrictions = dietaryRestriction;
-        console.log('Dietary restrictions updated:', state.formData.dietaryRestrictions);
     },
     updateExperiences(state, {experience, rating}) {
         state.formData.experiences = {
@@ -156,12 +142,10 @@ const mutations = {
     },
     setItinerary(state, itinerary) {
         state.itinerary = itinerary;
-        console.log('Itinerary updated:', state.itinerary);
     },
 }
 
 function formatDateTime(date) {
-    console.log('Date:', date);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
     const day = String(date.getDate()).padStart(2, '0');
