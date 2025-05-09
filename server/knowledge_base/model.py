@@ -166,13 +166,11 @@ Although I have some preferences, I want to visit different places in {city_name
 
 def generate_food(city_name, start_time):
     global FOOD_VECTOR_DB
-    print("Yummy in my tummy")
     index = build_faiss_index(food=True)
     query = f"""You are a travel agent helping me develop an itinerary for my trip to {city_name}. I am trying to find a restaurant to go to at {start_time.strftime("%Y-%m-%d %H:%M")}. Please choose something good!"""
     
     results = retrieve(query, index, top_n=1, food=True)
     selected_text = results[0]
-    print(selected_text)
     FOOD_VECTOR_DB = [entry for entry in FOOD_VECTOR_DB if entry[1] != selected_text]
     
     return selected_text

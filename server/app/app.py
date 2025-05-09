@@ -48,7 +48,6 @@ def home():
     end_day = datetime.strptime(persona.end_day, "%Y-%m-%d")
     itinerary = []
     while curr_day <= end_day:
-        print("Today:", curr_day)
         itinerary, day = generate_day.generate_day(itinerary, city_name, lat, lng, persona, curr_day)
         whole_trip += [day]
         curr_day = curr_day + timedelta(days=1)
@@ -82,7 +81,6 @@ def generate_itinerary():
     end_day = datetime.strptime(persona.end_day, "%Y-%m-%d")
     itinerary = []
     while curr_day <= end_day:
-        print("Today:", curr_day)
         itinerary, day = generate_day.generate_day(itinerary, city_name, lat, lng, persona, curr_day)
         whole_trip += [day]
         curr_day = curr_day + timedelta(days=1)
