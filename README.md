@@ -10,12 +10,14 @@ This application's frontend was built using Vue.js, alongside Primvue for UI com
 To get this project up and running locally: 
 1. Clone the repository
 2. Install dependencies:
-   - run 'npm install'
-3. Run the development server:
-   - run 'npm run dev'
-
-To run the backend: 
-- run 'flask run' from the app folder
+   - run `npm install` in the client folder
+   - run `pip install -r requirements.txt` in the server folder
+3. Create a .env file
+   - Obtain an API key for the Google Places API and call it `PLACES_API_KEY`
+   - Obtain an API key for the Mistral API and call it `MISTRAL_API_KEY`
+5. Run the development server:
+   - run `npm run dev` to run the frontend
+   - run `flask run` to run the backend
 
 ## Component Libraries
 Within this vue application, we are using Primevue as our UI component library. (https://primevue.org/) 
