@@ -15,7 +15,7 @@ To get this project up and running locally:
    - run 'npm run dev'
 
 To run the backend: 
-(enter steps here)
+- run 'flask run' from the app folder
 
 ## Component Libraries
 Within this vue application, we are using Primevue as our UI component library. (https://primevue.org/) 
